@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-zenicorp-border;
+  }
+  body {
+    @apply bg-white text-zenicorp-black antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .container-zenicorp {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-zenicorp-black border-2 border-zenicorp-black rounded-none hover:bg-zenicorp-gold hover:border-zenicorp-gold hover:text-zenicorp-black transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-zenicorp-gold focus:ring-offset-2;
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-zenicorp-black bg-transparent border-2 border-zenicorp-black rounded-none hover:bg-zenicorp-black hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-zenicorp-black focus:ring-offset-2;
+  }
+  
+  .btn-gold {
+    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-zenicorp-black bg-zenicorp-gold border-2 border-zenicorp-gold rounded-none hover:bg-zenicorp-black hover:border-zenicorp-black hover:text-zenicorp-gold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-zenicorp-black focus:ring-offset-2;
+  }
+
+  .heading-1 {
+    @apply text-3xl sm:text-4xl lg:text-5xl font-heading font-bold tracking-tight text-zenicorp-black;
+  }
+  
+  .heading-2 {
+    @apply text-2xl sm:text-3xl font-heading font-bold tracking-tight text-zenicorp-black;
+  }
+  
+  .heading-3 {
+    @apply text-xl sm:text-2xl font-heading font-semibold tracking-tight text-zenicorp-black;
+  }
+  
+  .body-large {
+    @apply text-lg text-zenicorp-mediumGray leading-relaxed;
+  }
+  
+  .body-base {
+    @apply text-base text-zenicorp-mediumGray leading-relaxed;
+  }
+  
+  .section-padding {
+    @apply py-8 sm:py-12 lg:py-16;
+  }
+  
+  .card {
+    @apply bg-white border border-zenicorp-border rounded-none overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-zenicorp-gold;
+  }
+  
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-none text-xs font-medium;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+  .animate-slide-up { animation: slideUp 0.6s ease-out; }
+  
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+}
