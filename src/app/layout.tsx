@@ -28,13 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="bg-zenicorp-black text-white sticky top-0 z-50">
           <div className="container-zenicorp flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-zenicorp-gold flex items-center justify-center">
-                <span className="font-heading font-bold text-white text-xl">Z</span>
-              </div>
-              <div className="leading-tight">
-                <span className="font-heading font-bold text-lg tracking-wide">ZENICORP</span>
-                <span className="block text-[10px] uppercase tracking-[0.25em] text-zenicorp-gold">Toiture</span>
-              </div>
+              <img src="/logo.png" alt="ZeniCorp" className="h-10 w-auto" />
             </Link>
             <nav className="hidden md:flex items-center gap-8 text-sm">
               <Link href="/#services" className="hover:text-zenicorp-gold transition-colors">Services</Link>
@@ -50,10 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="container-zenicorp py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-zenicorp-gold flex items-center justify-center">
-                  <span className="font-heading font-bold text-white text-lg">Z</span>
-                </div>
-                <span className="font-heading font-bold text-lg">ZENICORP</span>
+                <img src="/logo.png" alt="ZeniCorp" className="h-9 w-auto" />
               </div>
               <p className="text-sm text-zenicorp-silver">Division Toiture. Une division de ZeniCorp Groupe Construction.</p>
             </div>
