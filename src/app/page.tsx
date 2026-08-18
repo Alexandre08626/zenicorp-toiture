@@ -14,38 +14,47 @@ import {
   Droplet,
 } from 'lucide-react';
 
+const px = (id: number, w = 800) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
+
+const HERO_IMG = px(33404248, 1920);
+
 const services = [
   {
     icon: Home,
     title: 'Toiture résidentielle',
     desc: 'Réparation et remplacement de toits pour maisons unifamiliales, jumelées et copropriétés.',
     features: ['Bardeaux d\'asphalte premium', 'Ventilation adéquate', 'Inspection incluse', 'Garantie 10 ans'],
+    img: px(18098285),
   },
   {
     icon: Building2,
     title: 'Toiture commerciale',
     desc: 'Systèmes de membrane pour toits plats et faible pente. Installations sans interruption de vos opérations.',
     features: ['Membrane PVC / TPO / bitumineuse', 'Isolation thermique', 'Drainage optimisé', 'Entretien préventif'],
+    img: px(31763541),
   },
   {
     icon: Droplet,
     title: 'Réparation de fuites',
     desc: 'Intervention rapide pour fuites et infiltrations. Localisation précise et réparation durable.',
     features: ['Détection professionnelle', 'Réparation garantie', 'Service prioritaire', 'Rapport photo'],
+    img: px(210538),
   },
   {
     icon: Search,
     title: 'Inspection de toiture',
     desc: 'Rapport complet avec photos, état des matériaux et recommandations chiffrées. Pour acheteurs et propriétaires.',
     features: ['Rapport détaillé 20+ points', 'Photos haute résolution', 'Estimation durée de vie', 'Recommandations'],
+    img: px(38629153),
   },
 ];
 
 const realisations = [
-  { title: 'Remplacement complet - Québec', desc: 'Bardeaux architectural 30 ans', value: '14 500 $' },
-  { title: 'Toit plat commercial - Lévis', desc: 'Membrane PVC + isolation', value: '52 000 $' },
-  { title: 'Réparation urgence - Montréal', desc: 'Fuite toiture, intervention 24h', value: '2 800 $' },
-  { title: 'Toiture 2 étages - Trois-Rivières', desc: 'Remplacement + cheminée', value: '19 200 $' },
+  { title: 'Remplacement complet - Québec', desc: 'Bardeaux architectural 30 ans', value: '14 500 $', img: px(237907, 600) },
+  { title: 'Toit plat commercial - Lévis', desc: 'Membrane PVC + isolation', value: '52 000 $', img: px(5993912, 600) },
+  { title: 'Réparation urgence - Montréal', desc: 'Fuite toiture, intervention 24h', value: '2 800 $', img: px(38218884, 600) },
+  { title: 'Toiture 2 étages - Trois-Rivières', desc: 'Remplacement + cheminée', value: '19 200 $', img: px(14064712, 600) },
 ];
 
 const faqs = [
@@ -80,7 +89,8 @@ export default function ToiturePage() {
 
       {/* HERO */}
       <section className="relative bg-zenicorp-black text-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-zenicorp-black via-zenicorp-darkGray to-zenicorp-black"></div>
+        <img src={HERO_IMG} alt="Couvreur installant des bardeaux d'asphalte avec une cloueuse" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-zenicorp-black via-zenicorp-black/80 to-zenicorp-black/30"></div>
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #991B1B 0px, #991B1B 1px, transparent 1px, transparent 60px)' }}></div>
         <div className="container-zenicorp relative py-20 lg:py-28">
           <div className="max-w-3xl animate-slide-up">
@@ -161,19 +171,27 @@ export default function ToiturePage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {services.map((service) => (
-              <div key={service.title} className="card p-6">
-                <div className="w-12 h-12 bg-zenicorp-black flex items-center justify-center mb-4">
-                  <service.icon className="w-6 h-6 text-zenicorp-gold" />
+              <div key={service.title} className="card overflow-hidden p-0 group">
+                <div className="relative h-44 overflow-hidden">
+                  <img src={service.img} alt={service.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                  <div className="absolute bottom-3 left-4 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-zenicorp-gold flex items-center justify-center">
+                      <service.icon className="w-5 h-5 text-zenicorp-black" />
+                    </div>
+                    <h3 className="text-white font-semibold drop-shadow">{service.title}</h3>
+                  </div>
                 </div>
-                <h3 className="heading-3 mb-3">{service.title}</h3>
-                <p className="body-base text-sm mb-4">{service.desc}</p>
-                <ul className="space-y-2">
-                  {service.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-zenicorp-mediumGray">
-                      <CheckCircle2 className="w-4 h-4 text-zenicorp-gold" /> {f}
-                    </li>
-                  ))}
-                </ul>
+                <div className="p-6">
+                  <p className="body-base text-sm mb-4">{service.desc}</p>
+                  <ul className="space-y-2">
+                    {service.features.map((f) => (
+                      <li key={f} className="flex items-center gap-2 text-sm text-zenicorp-mediumGray">
+                        <CheckCircle2 className="w-4 h-4 text-zenicorp-gold" /> {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             ))}
           </div>
@@ -189,13 +207,16 @@ export default function ToiturePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {realisations.map((r) => (
-              <div key={r.title} className="card p-6">
-                <div className="h-32 bg-gradient-to-br from-zenicorp-darkGray to-zenicorp-black flex items-center justify-center mb-4">
-                  <Paintbrush className="w-10 h-10 text-zenicorp-gold" />
+              <div key={r.title} className="card overflow-hidden p-0 group">
+                <div className="relative h-40 overflow-hidden">
+                  <img src={r.img} alt={r.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                  <span className="absolute top-3 right-3 bg-zenicorp-gold text-zenicorp-black text-xs font-bold px-2 py-1">{r.value}</span>
                 </div>
-                <h3 className="font-semibold text-sm">{r.title}</h3>
-                <p className="text-xs text-zenicorp-mediumGray mt-1">{r.desc}</p>
-                <p className="text-zenicorp-gold font-bold text-sm mt-2">{r.value}</p>
+                <div className="p-5">
+                  <h3 className="font-semibold text-sm">{r.title}</h3>
+                  <p className="text-xs text-zenicorp-mediumGray mt-1">{r.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -215,7 +236,7 @@ export default function ToiturePage() {
               { n: '02', t: 'Inspection gratuite', d: 'Évaluation de l\'état du toit, des matériaux et de la structure par nos experts.' },
               { n: '03', t: 'Installation', d: 'Pose professionnelle, nettoyage complet du chantier et garantie 10 ans.' },
             ].map((s) => (
-              <div key={s.n} className="border border-zenicorp-mediumGray p-6">
+              <div key={s.n} className="border border-zenicorp-mediumGray p-6 hover:border-zenicorp-gold/60 transition-colors">
                 <span className="font-heading text-5xl text-zenicorp-gold font-bold">{s.n}</span>
                 <h3 className="text-xl font-semibold mt-4 mb-2">{s.t}</h3>
                 <p className="text-sm text-zenicorp-silver">{s.d}</p>
