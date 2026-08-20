@@ -4,7 +4,7 @@
 
 @layer base {
   * {
-    @apply border-zenicorp-border;
+    @apply border-gray-200;
   }
   body {
     @apply bg-white text-zenicorp-black antialiased;
