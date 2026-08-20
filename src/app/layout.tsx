@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
-import Link from 'next/link';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
@@ -11,12 +10,12 @@ export const metadata: Metadata = {
   description: 'Toiture professionnelle. Résidentiel, commercial, réparation de fuites, inspection. Garantie, installation rapide, matériaux de qualité. Soumission gratuite 24h.',
 };
 
-export const viewport: Viewport = { themeColor: '#030303' };
+export const viewport: Viewport = { themeColor: '#fffbeb' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr-CA" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="bg-[#030303] text-white">
+      <body className="bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
         {children}
       </body>
     </html>
