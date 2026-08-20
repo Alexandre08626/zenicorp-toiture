@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Shield,
@@ -12,185 +15,283 @@ import {
   Layers,
   Paintbrush,
   Droplet,
+  Star,
+  Zap,
+  ArrowRight,
+  Calculator,
+  Users,
+  Calendar,
+  Menu,
+  X,
 } from 'lucide-react';
 
-const px = (id: number, w = 800) =>
-  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
+const AnimatedCounter = ({ end, suffix = '' }: { end: number; suffix?: string }) => {
+  const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
 
-const HERO_IMG = px(33404248, 1920);
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setIsVisible(true);
+    }, { threshold: 0.1 });
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    let start: number;
+    const animate = (now: number) => {
+      if (!start) start = now;
+      const p = Math.min((now - start) / 2000, 1);
+      setCount(Math.floor((1 - Math.pow(1 - p, 4)) * end));
+      if (p < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [isVisible, end]);
+
+  return <span ref={ref}>{count}{suffix}</span>;
+};
+
+import { useRef } from 'react';
+
+const MouseGlow = ({ color = 'rgba(245,158,11,0.3)' }: { color?: string }) => {
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    const h = (e: MouseEvent) => setPos({ x: e.clientX, y: e.clientY });
+    window.addEventListener('mousemove', h);
+    return () => window.removeEventListener('mousemove', h);
+  }, []);
+  return <div className="fixed w-[500px] h-[500px] rounded-full pointer-events-none z-50 opacity-20 blur-[100px]" style={{ background: `radial-gradient(circle, ${color} 0%, transparent 70%)`, left: pos.x - 250, top: pos.y - 250 }} />;
+};
 
 const services = [
-  {
-    icon: Home,
-    title: 'Toiture résidentielle',
-    desc: 'Réparation et remplacement de toits pour maisons unifamiliales, jumelées et copropriétés.',
-    features: ['Bardeaux d\'asphalte premium', 'Ventilation adéquate', 'Inspection incluse', 'Garantie 10 ans'],
-    img: px(18098285),
-  },
-  {
-    icon: Building2,
-    title: 'Toiture commerciale',
-    desc: 'Systèmes de membrane pour toits plats et faible pente. Installations sans interruption de vos opérations.',
-    features: ['Membrane PVC / TPO / bitumineuse', 'Isolation thermique', 'Drainage optimisé', 'Entretien préventif'],
-    img: px(31763541),
-  },
-  {
-    icon: Droplet,
-    title: 'Réparation de fuites',
-    desc: 'Intervention rapide pour fuites et infiltrations. Localisation précise et réparation durable.',
-    features: ['Détection professionnelle', 'Réparation garantie', 'Service prioritaire', 'Rapport photo'],
-    img: px(210538),
-  },
-  {
-    icon: Search,
-    title: 'Inspection de toiture',
-    desc: 'Rapport complet avec photos, état des matériaux et recommandations chiffrées. Pour acheteurs et propriétaires.',
-    features: ['Rapport détaillé 20+ points', 'Photos haute résolution', 'Estimation durée de vie', 'Recommandations'],
-    img: px(38629153),
-  },
+  { icon: Home, title: 'Résidentielle', desc: 'Bardeaux architectural premium', price: 'À partir 8,500$', features: ['Bardeaux 30 ans', 'Ventilation optimale', 'Garantie 25 ans', 'Inspection'] },
+  { icon: Building2, title: 'Commerciale', desc: 'Membrane PVC/TPO', price: 'Sur devis', features: ['Membrane premium', 'Isolation incluse', 'Drainage optimisé', 'Sans interruption'] },
+  { icon: Droplet, title: 'Réparation Fuites', desc: 'Intervention urgente', price: 'À partir 450$', features: ['Détection pro', 'Réparation durable', '24/7 disponible', 'Rapport photo'] },
+  { icon: Search, title: 'Inspection', desc: 'Rapport complet 20+ points', price: 'À partir 350$', features: ['Photos HD', 'État matériaux', 'Durée de vie', 'Recommandations'] },
 ];
 
 const realisations = [
-  { title: 'Remplacement complet - Québec', desc: 'Bardeaux architectural 30 ans', value: '14 500 $', img: px(237907, 600) },
-  { title: 'Toit plat commercial - Lévis', desc: 'Membrane PVC + isolation', value: '52 000 $', img: px(5993912, 600) },
-  { title: 'Réparation urgence - Montréal', desc: 'Fuite toiture, intervention 24h', value: '2 800 $', img: px(38218884, 600) },
-  { title: 'Toiture 2 étages - Trois-Rivières', desc: 'Remplacement + cheminée', value: '19 200 $', img: px(14064712, 600) },
+  { title: 'Remplacement Québec', desc: 'Bardeaux architectural', value: '14,500 $', img: 'https://images.pexels.com/photos/237907/pexels-photo-237907.jpeg?auto=compress&w=800' },
+  { title: 'Toit plat Lévis', desc: 'Membrane PVC + iso', value: '52,000 $', img: 'https://images.pexels.com/photos/5993912/pexels-photo-5993912.jpeg?auto=compress&w=800' },
+  { title: 'Urgence Montréal', desc: 'Fuite réparée 24h', value: '2,800 $', img: 'https://images.pexels.com/photos/38218884/pexels-photo-38218884.jpeg?auto=compress&w=800' },
+  { title: 'Résidence Trois-Rivières', desc: 'Remplacement 2 étages', value: '19,200 $', img: 'https://images.pexels.com/photos/14064712/pexels-photo-14064712.jpeg?auto=compress&w=800' },
 ];
 
 const faqs = [
-  {
-    q: 'Quand faut-il remplacer sa toiture ?',
-    a: 'En général tous les 20-25 ans pour les bardeaux d\'asphalte. Signes : bardeaux recourbés, granules dans les gouttières, fuites.',
-  },
-  {
-    q: 'Travaillez-vous en hiver ?',
-    a: 'Oui pour les urgences et réparations. Les remplacements complets se font de préférence en saison chaude (mai-octobre).',
-  },
-  {
-    q: 'La garantie est-elle transférable ?',
-    a: 'Oui, notre garantie de 10 ans sur l\'installation est transférable si vous vendez votre maison. Un atout majeur à la revente.',
-  },
-  {
-    q: 'Couverture d\'assurance ?',
-    a: 'ZeniCorp est entièrement assuré (responsabilité civile 2M$, CNESST). Certificat disponible sur demande.',
-  },
+  { q: 'Quand remplacer sa toiture ?', a: 'Tous les 20-25 ans pour les bardeaux. Signes : bardeaux recourbés, granules dans gouttières, fuites.' },
+  { q: 'Travaillez-vous en hiver ?', a: 'Oui pour urgences. Remplacements complets de mai à octobre.' },
+  { q: 'Garantie transférable ?', a: 'Oui ! Notre garantie 25 ans est transférable lors de la revente.' },
+  { q: 'Assurance ?', a: '2M$ responsabilité civile + CNESST. Certificat sur demande.' },
 ];
 
-export default function ToiturePage() {
+export default function ToitureMega() {
+  const [mounted, setMounted] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    setMounted(true);
+    const h = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', h, { passive: true });
+    return () => window.removeEventListener('scroll', h);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
-    <>
-      {/* BANDEAU URGENCE */}
-      <div className="bg-zenicorp-gold text-white">
-        <div className="container-zenicorp py-3 flex items-center justify-center gap-3 text-sm font-semibold">
-          <AlertTriangle className="w-5 h-5" />
-          Fuite de toiture ? Urgence 24/7 - Appelez le 1-800-ZENICORP
+    <div className="min-h-screen bg-[#030303] text-white overflow-x-hidden">
+      <MouseGlow color="rgba(245,158,11,0.3)" />
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[150px]" />
+        <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+      </div>
+
+      {/* Alert Banner */}
+      <div className="bg-amber-500 text-black py-2 relative z-50">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-center gap-2 text-sm font-semibold">
+          <AlertTriangle className="w-4 h-4" />
+          Fuite de toiture ? Urgence 24/7 - 1-800-ZENICORP
         </div>
       </div>
 
-      {/* HERO */}
-      <section className="relative bg-zenicorp-black text-white">
-        <img src={HERO_IMG} alt="Couvreur installant des bardeaux d'asphalte avec une cloueuse" className="absolute inset-0 w-full h-full object-cover opacity-40" />
-        <div className="absolute inset-0 bg-gradient-to-r from-zenicorp-black via-zenicorp-black/80 to-zenicorp-black/30"></div>
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #991B1B 0px, #991B1B 1px, transparent 1px, transparent 60px)' }}></div>
-        <div className="container-zenicorp relative py-20 lg:py-28">
-          <div className="max-w-3xl animate-slide-up">
-            <div className="inline-flex items-center gap-2 bg-zenicorp-gold/10 border border-zenicorp-gold/40 px-4 py-1.5 mb-6">
-              <Shield className="w-4 h-4 text-zenicorp-gold" />
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-zenicorp-gold">Division Toiture de ZeniCorp</span>
+      {/* Navigation */}
+      <nav className={`fixed top-8 left-0 right-0 z-40 transition-all duration-500 ${scrollY > 50 ? 'bg-[#030303]/80 backdrop-blur-xl border-b border-white/5' : ''}`}>
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <Home className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <span className="text-xl font-bold">ZENI<span className="text-amber-400">CORP</span></span>
+                <span className="block text-[10px] text-white/40 tracking-[0.3em] uppercase">Toiture Premium</span>
+              </div>
+            </Link>
+
+            <div className="hidden md:flex items-center gap-8">
+              {['Services', 'Réalisations', 'Garantie', 'FAQ'].map((item) => (
+                <a key={item} href={`#${item.toLowerCase()}`} className="text-sm text-white/60 hover:text-white transition-colors relative group">
+                  {item}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-400 group-hover:w-full transition-all" />
+                </a>
+              ))}
             </div>
-            <h1 className="heading-1 text-white !text-4xl sm:!text-5xl lg:!text-6xl mb-6">
-              Une toiture solide.
-              <span className="block text-zenicorp-gold">La tête tranquille.</span>
-            </h1>
-            <p className="text-lg text-zenicorp-silver mb-8 max-w-2xl">
-              Réparation, remplacement et inspection de toiture résidentielle et commerciale.
-              Matériaux premium, pose soignée, garantie 10 ans.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <a href="/soumission" className="btn-gold">Obtenir une soumission gratuite</a>
-              <a href="tel:18009364267" className="btn-secondary !border-white !text-white hover:!bg-white hover:!text-zenicorp-black">
-                <Phone className="w-4 h-4 mr-2" /> 1-800-ZENICORP
-              </a>
-            </div>
-            <div className="flex flex-wrap gap-8 mt-12">
-              <div className="flex items-center gap-2 text-sm text-zenicorp-silver">
-                <CheckCircle2 className="w-5 h-5 text-zenicorp-gold" /> Garantie 10 ans
-              </div>
-              <div className="flex items-center gap-2 text-sm text-zenicorp-silver">
-                <CheckCircle2 className="w-5 h-5 text-zenicorp-gold" /> Soumission sous 24h
-              </div>
-              <div className="flex items-center gap-2 text-sm text-zenicorp-silver">
-                <CheckCircle2 className="w-5 h-5 text-zenicorp-gold" /> Urgence 24/7
-              </div>
+
+            <div className="flex items-center gap-4">
+              <a href="tel:18009364267" className="hidden sm:block text-sm text-white/60">1-800-ZENICORP</a>
+              <a href="/soumission" className="px-6 py-2.5 bg-amber-500 text-black text-sm font-bold rounded-full hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/25">Soumission</a>
+              <button onClick={() => setMobileMenu(!mobileMenu)} className="md:hidden p-2">{mobileMenu ? <X /> : <Menu />}</button>
             </div>
           </div>
         </div>
-      </section>
+      </nav>
 
-      {/* BANDEAU AVANTAGES */}
-      <section className="bg-white border-b border-zenicorp-border">
-        <div className="container-zenicorp py-8 grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="flex items-center gap-3">
-            <Award className="w-8 h-8 text-zenicorp-gold flex-shrink-0" />
-            <div>
-              <p className="font-semibold text-sm">Garantie 10 ans</p>
-              <p className="text-xs text-zenicorp-mediumGray">Transferable</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Clock className="w-8 h-8 text-zenicorp-gold flex-shrink-0" />
-            <div>
-              <p className="font-semibold text-sm">Respect échéancier</p>
-              <p className="text-xs text-zenicorp-mediumGray">Délais tenus</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Layers className="w-8 h-8 text-zenicorp-gold flex-shrink-0" />
-            <div>
-              <p className="font-semibold text-sm">Matériaux premium</p>
-              <p className="text-xs text-zenicorp-mediumGray">Bardeaux 30 ans</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Shield className="w-8 h-8 text-zenicorp-gold flex-shrink-0" />
-            <div>
-              <p className="font-semibold text-sm">Assuré 2M$</p>
-              <p className="text-xs text-zenicorp-mediumGray">CNESST + RC</p>
-            </div>
-          </div>
+      {mobileMenu && (
+        <div className="fixed inset-0 z-50 bg-[#030303]/95 backdrop-blur-xl pt-28 px-6 md:hidden">
+          {['Services', 'Réalisations', 'Garantie', 'FAQ'].map((item) => (
+            <a key={item} href={`#${item.toLowerCase()}`} onClick={() => setMobileMenu(false)} className="block text-2xl font-medium py-4 border-b border-white/10">{item}</a>
+          ))}
         </div>
-      </section>
+      )}
 
-      {/* SERVICES */}
-      <section id="services" className="section-padding bg-zenicorp-lightGray">
-        <div className="container-zenicorp">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <p className="text-zenicorp-gold font-semibold uppercase tracking-[0.2em] text-xs mb-3">Nos services</p>
-            <h2 className="heading-2">Protection complète du dessus de votre bâtiment</h2>
-            <p className="body-base mt-4">Résidentiel, commercial et industriel. Une seule équipe pour tout.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {services.map((service) => (
-              <div key={service.title} className="card overflow-hidden p-0 group">
-                <div className="relative h-44 overflow-hidden">
-                  <img src={service.img} alt={service.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                  <div className="absolute bottom-3 left-4 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-zenicorp-gold flex items-center justify-center">
-                      <service.icon className="w-5 h-5 text-zenicorp-black" />
+      {/* Hero */}
+      <section className="relative min-h-screen flex items-center pt-28">
+        <div className="max-w-7xl mx-auto px-6 py-20 w-full">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20">
+                <Shield className="w-4 h-4 text-amber-400" />
+                <span className="text-sm text-amber-300">Garantie 25 ans incluse</span>
+              </div>
+
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1]">
+                Toiture
+                <span className="block text-transparent bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 bg-clip-text">Premium</span>
+              </h1>
+
+              <p className="text-lg text-white/60 max-w-xl">Résidentiel et commercial. Bardeaux architectural, membrane PVC/TPO. Garantie 25 ans, installation rapide, matériaux certifiés.</p>
+
+              <div className="flex flex-wrap gap-4">
+                <a href="/soumission" className="inline-flex items-center gap-3 px-8 py-4 bg-amber-500 text-black font-bold rounded-full hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/30 hover:scale-105">
+                  <Calculator className="w-5 h-5" />
+                  Devis gratuit
+                </a>
+                <a href="tel:18009364267" className="inline-flex items-center gap-3 px-8 py-4 border border-white/20 rounded-full hover:bg-white/5 transition-all">
+                  <Phone className="w-5 h-5" />
+                  Urgence 24/7
+                </a>
+              </div>
+
+              <div className="flex items-center gap-6 pt-4">
+                <div className="flex -space-x-3">
+                  {[1,2,3,4].map((i) => (
+                    <div key={i} className="w-10 h-10 rounded-full border-2 border-[#030303] bg-amber-500/20 flex items-center justify-center">
+                      <Star className="w-4 h-4 text-amber-400" />
                     </div>
-                    <h3 className="text-white font-semibold drop-shadow">{service.title}</h3>
+                  ))}
+                </div>
+                <div>
+                  <div className="flex gap-1">
+                    {[1,2,3,4,5].map((i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
                   </div>
+                  <p className="text-sm text-white/50 mt-1">4.9/5 - 1,800+ toitures</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="rounded-3xl overflow-hidden">
+                <img src="https://images.pexels.com/photos/33404248/pexels-photo-33404248.jpeg?auto=compress&w=1200" alt="Toiture" className="w-full h-[500px] object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-transparent" />
+              </div>
+              <div className="absolute bottom-6 left-6 right-6 p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div><p className="text-2xl font-bold text-amber-400">25</p><p className="text-xs text-white/50">Ans garantie</p></div>
+                  <div><p className="text-2xl font-bold text-amber-400">24h</p><p className="text-xs text-white/50">Soumission</p></div>
+                  <div><p className="text-2xl font-bold text-amber-400">2M$</p><p className="text-xs text-white/50">Assurance</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="py-20 border-y border-white/5">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { value: 1800, suffix: '+', label: 'Toitures', icon: Home },
+              { value: 25, suffix: ' ans', label: 'Garantie', icon: Award },
+              { value: 24, suffix: '/7', label: 'Urgence', icon: Clock },
+              { value: 15, suffix: '+', label: 'Ans exp.', icon: Shield },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center group">
+                <div className="inline-flex p-4 rounded-2xl bg-amber-500/10 mb-4 group-hover:bg-amber-500/20 transition-colors">
+                  <stat.icon className="w-8 h-8 text-amber-400" />
+                </div>
+                <p className="text-4xl font-bold"><AnimatedCounter end={stat.value} suffix={stat.suffix} /></p>
+                <p className="text-sm text-white/50 mt-2">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services */}
+      <section id="services" className="py-32">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="inline-block px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 text-sm text-amber-300 mb-6">Expertise</span>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">Nos <span className="text-amber-400">services</span></h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {services.map((service) => (
+              <div key={service.title} className="group p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-amber-500/30 transition-all duration-500 hover:-translate-y-2">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-4 rounded-2xl bg-amber-500/20 group-hover:scale-110 transition-transform">
+                    <service.icon className="w-8 h-8 text-amber-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold">{service.title}</h3>
+                    <p className="text-white/50">{service.desc}</p>
+                  </div>
+                  <div className="px-4 py-2 rounded-full bg-amber-500 text-black font-bold text-sm">{service.price}</div>
+                </div>
+                <ul className="grid grid-cols-2 gap-3">
+                  {service.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-white/60">
+                      <CheckCircle2 className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Réalisations */}
+      <section id="realisations" className="py-32 border-y border-white/5">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-6">Réalisations <span className="text-amber-400">récentes</span></h2>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {realisations.map((r) => (
+              <div key={r.title} className="group rounded-3xl overflow-hidden bg-white/[0.02] border border-white/5 hover:border-amber-500/30 transition-all">
+                <div className="relative h-48 overflow-hidden">
+                  <img src={r.img} alt={r.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#030303] to-transparent" />
+                  <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-amber-500 text-black font-bold text-sm">{r.value}</div>
                 </div>
                 <div className="p-6">
-                  <p className="body-base text-sm mb-4">{service.desc}</p>
-                  <ul className="space-y-2">
-                    {service.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-sm text-zenicorp-mediumGray">
-                        <CheckCircle2 className="w-4 h-4 text-zenicorp-gold" /> {f}
-                      </li>
-                    ))}
-                  </ul>
+                  <h3 className="font-bold">{r.title}</h3>
+                  <p className="text-sm text-white/50">{r.desc}</p>
                 </div>
               </div>
             ))}
@@ -198,48 +299,22 @@ export default function ToiturePage() {
         </div>
       </section>
 
-      {/* RÉALISATIONS */}
-      <section id="realisations" className="section-padding bg-white">
-        <div className="container-zenicorp">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <p className="text-zenicorp-gold font-semibold uppercase tracking-[0.2em] text-xs mb-3">Réalisations</p>
-            <h2 className="heading-2">Des projets récents</h2>
+      {/* Process */}
+      <section className="py-32">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-6">Notre <span className="text-amber-400">processus</span></h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {realisations.map((r) => (
-              <div key={r.title} className="card overflow-hidden p-0 group">
-                <div className="relative h-40 overflow-hidden">
-                  <img src={r.img} alt={r.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <span className="absolute top-3 right-3 bg-zenicorp-gold text-zenicorp-black text-xs font-bold px-2 py-1">{r.value}</span>
-                </div>
-                <div className="p-5">
-                  <h3 className="font-semibold text-sm">{r.title}</h3>
-                  <p className="text-xs text-zenicorp-mediumGray mt-1">{r.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PROCESSUS */}
-      <section className="section-padding bg-zenicorp-black text-white">
-        <div className="container-zenicorp">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <p className="text-zenicorp-gold font-semibold uppercase tracking-[0.2em] text-xs mb-3">Comment ça marche</p>
-            <h2 className="heading-2 text-white">3 étapes simples</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-8">
             {[
-              { n: '01', t: 'Soumission', d: 'Formulaire en 2 minutes. Réponse sous 24h avec prix détaillé.' },
-              { n: '02', t: 'Inspection gratuite', d: 'Évaluation de l\'état du toit, des matériaux et de la structure par nos experts.' },
-              { n: '03', t: 'Installation', d: 'Pose professionnelle, nettoyage complet du chantier et garantie 10 ans.' },
-            ].map((s) => (
-              <div key={s.n} className="border border-zenicorp-mediumGray p-6 hover:border-zenicorp-gold/60 transition-colors">
-                <span className="font-heading text-5xl text-zenicorp-gold font-bold">{s.n}</span>
-                <h3 className="text-xl font-semibold mt-4 mb-2">{s.t}</h3>
-                <p className="text-sm text-zenicorp-silver">{s.d}</p>
+              { n: '01', title: 'Soumission', desc: 'Formulaire en 2 min. Réponse sous 24h.' },
+              { n: '02', title: 'Inspection', desc: 'Évaluation gratuite de votre toiture.' },
+              { n: '03', title: 'Installation', desc: 'Pose professionnelle. Garantie 25 ans.' },
+            ].map((step) => (
+              <div key={step.n} className="p-8 rounded-3xl bg-white/[0.02] border border-white/5 text-center group hover:border-amber-500/30 transition-all">
+                <span className="text-6xl font-bold text-amber-400/20">{step.n}</span>
+                <h3 className="text-xl font-bold mt-4 mb-2">{step.title}</h3>
+                <p className="text-white/50">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -247,39 +322,39 @@ export default function ToiturePage() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="section-padding bg-zenicorp-lightGray">
-        <div className="container-zenicorp max-w-3xl">
-          <div className="text-center mb-12">
-            <p className="text-zenicorp-gold font-semibold uppercase tracking-[0.2em] text-xs mb-3">FAQ</p>
-            <h2 className="heading-2">Questions fréquentes</h2>
+      <section id="faq" className="py-32 border-y border-white/5">
+        <div className="max-w-3xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-6">FAQ <span className="text-amber-400">Toiture</span></h2>
           </div>
           <div className="space-y-4">
-            {faqs.map((f) => (
-              <details key={f.q} className="card p-6 group">
-                <summary className="flex items-center justify-between cursor-pointer font-semibold">
-                  {f.q}
-                  <span className="text-zenicorp-gold text-xl group-open:rotate-45 transition-transform">+</span>
+            {faqs.map((faq, i) => (
+              <details key={i} className="group p-6 rounded-2xl bg-white/[0.02] border border-white/5 cursor-pointer">
+                <summary className="flex items-center justify-between font-semibold text-lg group-hover:text-amber-400 transition-colors">
+                  {faq.q}
+                  <span className="text-amber-400 text-2xl group-open:rotate-45 transition-transform">+</span>
                 </summary>
-                <p className="body-base text-sm mt-4">{f.a}</p>
+                <p className="mt-4 text-white/60">{faq.a}</p>
               </details>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA FINAL */}
-      <section className="bg-zenicorp-black text-white">
-        <div className="container-zenicorp py-16 text-center">
-          <h2 className="heading-2 text-white mb-4">Protégez ce qu\'il y a au-dessus de votre tête ?</h2>
-          <p className="text-zenicorp-silver mb-8">Soumission gratuite sous 24h. Urgence 24/7.</p>
+      {/* CTA */}
+      <section className="py-32 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-500/10 rounded-full blur-[150px]" />
+        </div>
+        <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+          <h2 className="text-4xl md:text-6xl font-bold mb-6">Protégez votre <span className="text-amber-400">toit</span></h2>
+          <p className="text-xl text-white/60 mb-10">Soumission gratuite sous 24h. Urgence 24/7.</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="/soumission" className="btn-gold">Obtenir ma soumission gratuite</a>
-            <a href="tel:18009364267" className="btn-secondary !border-white !text-white hover:!bg-white hover:!text-zenicorp-black">
-              <Phone className="w-4 h-4 mr-2" /> 1-800-ZENICORP
-            </a>
+            <a href="/soumission" className="inline-flex items-center gap-3 px-8 py-4 bg-amber-500 text-black font-bold rounded-full hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/30 hover:scale-105">Devis gratuit</a>
+            <a href="tel:18009364267" className="inline-flex items-center gap-3 px-8 py-4 border border-white/20 rounded-full hover:bg-white/5 transition-all">1-800-ZENICORP</a>
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
