@@ -423,6 +423,248 @@ export default function ToiturePage() {
         </div>
       </section>
 
+      {/* SHOP MODAL - CONFIGURATEUR */}
+      {showShop && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6"
+          onClick={() => { setShowShop(false); resetShop(); }}
+        >
+          <div
+            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-900 rounded-3xl border border-white/10 p-6 sm:p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl sm:text-3xl font-black">Configurer votre toiture</h2>
+                <button onClick={() => { setShowShop(false); resetShop(); }} className="p-2 hover:bg-white/10 rounded-full"><X className="w-6 h-6" /></button>
+              </div>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((step) => (
+                  <div key={step} className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
+                    <div className={`h-full rounded-full transition-all duration-300 ${shopStep >= step ? 'bg-orange-400' : 'bg-transparent'}`} />
+                  </div>
+                ))}
+              </div>
+              <p className="text-white/60 text-sm mt-2">Etape {shopStep} sur 5</p>
+            </div>
+
+            {shopStep === 1 && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-center">Quelle est la surface a couvrir?</h3>
+                <div className="space-y-4">
+                  <input
+                    type="number"
+                    value={projectSqft}
+                    onChange={(e) => setProjectSqft(e.target.value)}
+                    placeholder="Nombre de pieds carres (ex: 2000)"
+                    className="w-full px-6 py-5 bg-white/5 border-2 border-white/20 rounded-2xl text-white text-2xl font-bold text-center focus:border-orange-500 focus:outline-none"
+                  />
+                  <p className="text-white/40 text-center text-sm">
+                    Prix : $5.50 - $15.00 / pied carre selon la couverture choisie
+                  </p>
+                </div>
+                <button
+                  onClick={() => projectSqft && parseFloat(projectSqft) > 0 && setShopStep(2)}
+                  disabled={!projectSqft || parseFloat(projectSqft) <= 0}
+                  className="w-full py-5 bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-black font-black text-xl rounded-2xl transition-all"
+                >
+                  CONTINUER
+                </button>
+              </div>
+            )}
+
+            {shopStep === 2 && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-center">Choisissez votre couverture</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button
+                    onClick={() => { setProjectFinish('bardeaux'); setShopStep(3); }}
+                    className={`p-6 rounded-2xl border-2 transition-all text-left ${projectFinish === 'bardeaux' ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-white/5 hover:border-white/30'}`}
+                  >
+                    <div className="font-bold text-xl mb-2">Bardeaux d'asphalte</div>
+                    <div className="text-3xl font-black text-orange-400">$5.50<span className="text-base text-white/60 font-normal">/pied²</span></div>
+                    <p className="text-sm text-white/40 mt-2">Classique, durable, garantie 25 ans</p>
+                  </button>
+
+                  <button
+                    onClick={() => { setProjectFinish('metal'); setShopStep(3); }}
+                    className={`p-6 rounded-2xl border-2 transition-all text-left ${projectFinish === 'metal' ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-white/5 hover:border-white/30'}`}
+                  >
+                    <div className="font-bold text-xl mb-2">Tole metallique</div>
+                    <div className="text-3xl font-black text-orange-400">$8.50<span className="text-base text-white/60 font-normal">/pied²</span></div>
+                    <p className="text-sm text-white/40 mt-2">Duree de vie 50 ans, entretien minime</p>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {shopStep === 3 && projectFinish && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-center">
+                  {projectFinish === 'bardeaux' ? 'Choisissez vos bardeaux' : 'Choisissez votre tole'}
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto">
+                  {(projectFinish === 'bardeaux' ? bardeauxOptions : metalOptions).map((option) => (
+                    <button
+                      key={option.name}
+                      onClick={() => { setProjectOption(option.name); setShopStep(4); }}
+                      className={`p-3 rounded-xl border-2 transition-all ${projectOption === option.name ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-white/5 hover:border-white/30'}`}
+                    >
+                      <div className="aspect-square rounded-lg overflow-hidden mb-2">
+                        <img src={option.image} alt={option.name} className="w-full h-full object-cover" />
+                      </div>
+                      <p className="font-bold text-sm">{option.name}</p>
+                      <p className="text-orange-400 text-xs">{option.price.toFixed(2)} $/pied²</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {shopStep === 4 && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-center">Quand souhaitez-vous la pose?</h3>
+                <div className="space-y-4">
+                  <input
+                    type="date"
+                    value={installDate}
+                    onChange={(e) => setInstallDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full px-6 py-5 bg-white/5 border-2 border-white/20 rounded-2xl text-white text-xl font-bold text-center focus:border-orange-500 focus:outline-none"
+                  />
+                  <p className="text-white/40 text-center text-sm">
+                    Pose effectuee dans les plus brefs delais
+                  </p>
+                </div>
+                <button
+                  onClick={() => installDate && setShopStep(5)}
+                  disabled={!installDate}
+                  className="w-full py-5 bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-black font-black text-xl rounded-2xl transition-all"
+                >
+                  VOIR LE RECAPITULATIF
+                </button>
+              </div>
+            )}
+
+            {shopStep === 5 && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-center">Recapitulatif de votre projet</h3>
+                <div className="bg-white/5 rounded-2xl p-6 space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Surface</span>
+                    <span className="font-bold">{projectSqft} pieds carres</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Couverture</span>
+                    <span className="font-bold">{projectFinish === 'bardeaux' ? 'Bardeaux' : 'Tole'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Materiau</span>
+                    <span className="font-bold">{projectOption}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Date souhaitee</span>
+                    <span className="font-bold">{installDate ? new Date(installDate).toLocaleDateString('fr-CA') : '-'}</span>
+                  </div>
+                  <div className="border-t border-white/10 pt-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-white/60">Total projet</span>
+                      <span className="text-2xl font-black text-orange-400">${getProjectTotal().toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <div className="bg-orange-500/10 rounded-xl p-4 border border-orange-500/30">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="text-white font-bold">Acompte a payer (30%)</span>
+                        <p className="text-xs text-white/60">Solde payable apres la pose</p>
+                      </div>
+                      <span className="text-3xl font-black text-orange-400">${getDepositAmount().toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-lg font-bold text-center">Payer avec Zenipay</h4>
+                  {paymentProcessing ? (
+                    <div className="text-center py-8">
+                      <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                      <p className="text-white/60">Connexion a Zenipay...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        onClick={async () => {
+                          setPaymentProcessing(true);
+                          const paymentData = {
+                            amount: getDepositAmount(),
+                            currency: 'CAD',
+                            description: `Acompte Projet Toiture - ${projectOption} (${projectSqft} p²)`,
+                            metadata: {
+                              project_surface: projectSqft,
+                              project_finish: projectFinish,
+                              project_option: projectOption,
+                              install_date: installDate,
+                              total_amount: getProjectTotal(),
+                              deposit_amount: getDepositAmount()
+                            },
+                            success_url: 'https://zenicorp-toiture.vercel.app/paiement/success',
+                            cancel_url: 'https://zenicorp-toiture.vercel.app/paiement/annule'
+                          };
+                          try {
+                            const response = await fetch('https://api.zenipay.ca/v1/checkout/sessions', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${process.env.NEXT_PUBLIC_ZENIPAY_PUBLIC_KEY}`
+                              },
+                              body: JSON.stringify(paymentData)
+                            });
+                            const result = await response.json();
+                            if (result.url) {
+                              window.location.href = result.url;
+                            } else {
+                              alert('Erreur de connexion a Zenipay. Veuillez reessayer.');
+                              setPaymentProcessing(false);
+                            }
+                          } catch (error) {
+                            console.error('Zenipay error:', error);
+                            alert('Erreur de paiement. Contactez-nous au 581-748-7017');
+                            setPaymentProcessing(false);
+                          }
+                        }}
+                        className="w-full py-5 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-black font-black text-xl rounded-2xl transition-all flex items-center justify-center gap-3"
+                      >
+                        PAYER L'ACOMPTE {getDepositAmount().toFixed(2)}$ CAD
+                      </button>
+
+                      <p className="text-center text-white/40 text-xs">
+                        Paiement securise par Zenipay
+                      </p>
+
+                      <button
+                        onClick={() => setShopStep(1)}
+                        className="w-full py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all"
+                      >
+                        MODIFIER LE PROJET
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {shopStep > 1 && shopStep < 5 && (
+              <button
+                onClick={() => setShopStep(shopStep - 1)}
+                className="mt-6 w-full py-3 text-white/60 hover:text-white font-medium text-sm"
+              >
+                ← Retour a l'etape precedente
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* DEVIS MODAL */}
       {showQuote && (
         <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowQuote(false)}>

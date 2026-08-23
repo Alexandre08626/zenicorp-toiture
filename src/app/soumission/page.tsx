@@ -21,7 +21,7 @@ const steps = [
 
 export default function SoumissionPage() {
   return (
-    <div className="container-zenicorp py-12 max-w-2xl">
+    <div className="container-zenicorp bg-white py-12 max-w-2xl">
       <div className="text-center mb-10">
         <p className="text-zenicorp-gold font-semibold uppercase tracking-[0.2em] text-xs mb-3">Division Toiture</p>
         <h1 className="heading-1">Soumission gratuite</h1>
