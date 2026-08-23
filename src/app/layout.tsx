@@ -1,21 +1,20 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Playfair_Display } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
-const playfair = Playfair_Display({ subsets: ['latin'], display: 'swap', variable: '--font-playfair' });
 
 export const metadata: Metadata = {
-  title: 'ZeniCorp Toiture | Toiture résidentielle, commerciale et réparation',
-  description: 'Toiture professionnelle. Résidentiel, commercial, réparation de fuites, inspection. Garantie, installation rapide, matériaux de qualité. Soumission gratuite 24h.',
+  title: 'ZeniCorp Époxy | Finitions métalliques, flocons & naturel',
+  description: 'Installation professionnelle et vente de matériel époxy premium. Métallique, flocons, naturel. Québec.',
 };
 
-export const viewport: Viewport = { themeColor: '#fffbeb' };
+export const viewport: Viewport = { themeColor: '#0a0a0f' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr-CA" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+    <html lang="fr-CA" className={`${inter.variable} dark`}>
+      <body className="bg-[#0a0a0f] text-white antialiased">
         {children}
       </body>
     </html>
