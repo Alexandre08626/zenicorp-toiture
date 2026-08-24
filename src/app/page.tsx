@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { Phone, Check, ArrowRight, Calculator, MapPin, Clock, Shield, X, Package } from 'lucide-react';
@@ -181,9 +181,9 @@ export default function ToiturePage() {
     
     doc.setTextColor(60, 60, 60);
     doc.setFontSize(10);
-    doc.text('✓ Garantie 10-50 ans', 20, 250);
-    doc.text('✓ Service d\'urgence 24/7', 20, 258);
-    doc.text('✓ Entrepreneurs certifies RBQ', 20, 266);
+    doc.text('âœ“ Garantie 10-50 ans', 20, 250);
+    doc.text('âœ“ Service d\'urgence 24/7', 20, 258);
+    doc.text('âœ“ Entrepreneurs certifies RBQ', 20, 266);
     
     doc.setTextColor(120, 120, 120);
     doc.setFontSize(9);
@@ -292,7 +292,7 @@ export default function ToiturePage() {
               </div>
               <div className="flex items-center gap-2 text-white/60">
                 <MapPin className="w-5 h-5 text-orange-400" />
-                <span>Quebec & Environs</span>
+                <span>Partout au Québec</span>
               </div>
               <div className="flex items-center gap-2 text-white/60">
                 <Clock className="w-5 h-5 text-orange-400" />
@@ -318,7 +318,7 @@ export default function ToiturePage() {
                   className={`p-6 rounded-2xl border-2 transition-all text-left ${finishType === 'bardeaux' ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
                 >
                   <div className="font-bold text-xl mb-2">Bardeaux d'asphalte</div>
-                  <div className="text-3xl font-black text-orange-400">$5.50<span className="text-base text-white/60 font-normal">/pied²</span></div>
+                  <div className="text-3xl font-black text-orange-400">$5.50<span className="text-base text-white/60 font-normal">/piedÂ²</span></div>
                   <p className="text-sm text-white/40 mt-2">Classique, durable, garantie 25 ans</p>
                 </button>
 
@@ -327,7 +327,7 @@ export default function ToiturePage() {
                   className={`p-6 rounded-2xl border-2 transition-all text-left ${finishType === 'metal' ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
                 >
                   <div className="font-bold text-xl mb-2">Tole metallique</div>
-                  <div className="text-3xl font-black text-orange-400">$8.50<span className="text-base text-white/60 font-normal">/pied²</span></div>
+                  <div className="text-3xl font-black text-orange-400">$8.50<span className="text-base text-white/60 font-normal">/piedÂ²</span></div>
                   <p className="text-sm text-white/40 mt-2">Duree de vie 50 ans, entretien minime</p>
                 </button>
               </div>
@@ -382,7 +382,7 @@ export default function ToiturePage() {
                 <img src="/images/toiture-bardeaux.jpg" alt="Bardeaux" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
               </div>
               <h3 className="text-xl font-bold text-center">Bardeaux d'asphalte</h3>
-              <p className="text-orange-400 text-center">$5.50 - $7.50 / pied²</p>
+              <p className="text-orange-400 text-center">$5.50 - $7.50 / piedÂ²</p>
             </div>
             
             <div className="group cursor-pointer" onClick={() => openLightbox('/images/toiture-metal.jpg', 'Tole metallique')}>
@@ -390,7 +390,7 @@ export default function ToiturePage() {
                 <img src="/images/toiture-metal.jpg" alt="Tole metallique" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
               </div>
               <h3 className="text-xl font-bold text-center">Tole metallique</h3>
-              <p className="text-orange-400 text-center">$8.50 - $15.00 / pied²</p>
+              <p className="text-orange-400 text-center">$8.50 - $15.00 / piedÂ²</p>
             </div>
           </div>
         </div>
@@ -482,7 +482,7 @@ export default function ToiturePage() {
                     className={`p-6 rounded-2xl border-2 transition-all text-left ${projectFinish === 'bardeaux' ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-white/5 hover:border-white/30'}`}
                   >
                     <div className="font-bold text-xl mb-2">Bardeaux d'asphalte</div>
-                    <div className="text-3xl font-black text-orange-400">$5.50<span className="text-base text-white/60 font-normal">/pied²</span></div>
+                    <div className="text-3xl font-black text-orange-400">$5.50<span className="text-base text-white/60 font-normal">/piedÂ²</span></div>
                     <p className="text-sm text-white/40 mt-2">Classique, durable, garantie 25 ans</p>
                   </button>
 
@@ -491,7 +491,7 @@ export default function ToiturePage() {
                     className={`p-6 rounded-2xl border-2 transition-all text-left ${projectFinish === 'metal' ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-white/5 hover:border-white/30'}`}
                   >
                     <div className="font-bold text-xl mb-2">Tole metallique</div>
-                    <div className="text-3xl font-black text-orange-400">$8.50<span className="text-base text-white/60 font-normal">/pied²</span></div>
+                    <div className="text-3xl font-black text-orange-400">$8.50<span className="text-base text-white/60 font-normal">/piedÂ²</span></div>
                     <p className="text-sm text-white/40 mt-2">Duree de vie 50 ans, entretien minime</p>
                   </button>
                 </div>
@@ -514,7 +514,7 @@ export default function ToiturePage() {
                         <img src={option.image} alt={option.name} className="w-full h-full object-cover" />
                       </div>
                       <p className="font-bold text-sm">{option.name}</p>
-                      <p className="text-orange-400 text-xs">{option.price.toFixed(2)} $/pied²</p>
+                      <p className="text-orange-400 text-xs">{option.price.toFixed(2)} $/piedÂ²</p>
                     </button>
                   ))}
                 </div>
@@ -598,7 +598,7 @@ export default function ToiturePage() {
                           const paymentData = {
                             amount: getDepositAmount(),
                             currency: 'CAD',
-                            description: `Acompte Projet Toiture - ${projectOption} (${projectSqft} p²)`,
+                            description: `Acompte Projet Toiture - ${projectOption} (${projectSqft} pÂ²)`,
                             metadata: {
                               project_surface: projectSqft,
                               project_finish: projectFinish,
@@ -658,7 +658,7 @@ export default function ToiturePage() {
                 onClick={() => setShopStep(shopStep - 1)}
                 className="mt-6 w-full py-3 text-white/60 hover:text-white font-medium text-sm"
               >
-                ← Retour a l'etape precedente
+                â† Retour a l'etape precedente
               </button>
             )}
           </div>
