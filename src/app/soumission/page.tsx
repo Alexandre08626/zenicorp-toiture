@@ -1,8 +1,8 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import { CheckCircle2, Camera, CalendarClock, User, Send, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Soumission gratuite - Toiture | ZeniCorp',
+  title: 'Soumission gratuite - Toiture | Zeniva',
   description: 'Obtenez votre soumission gratuite en 10 étapes. Réponse sous 24h.',
 };
 

@@ -1,13 +1,13 @@
-import React from 'react';
+﻿import React from 'react';
 
-interface ZeniCorpLogoProps {
+interface ZenivaLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   variant?: 'light' | 'dark' | 'roof' | 'white' | 'security';
   showText?: boolean;
   className?: string;
 }
 
-const ZeniCorpLogo: React.FC<ZeniCorpLogoProps> = ({
+const ZenivaLogo: React.FC<ZenivaLogoProps> = ({
   size = 'md',
   variant = 'dark',
   showText = true,
@@ -137,7 +137,7 @@ const ZeniCorpLogo: React.FC<ZeniCorpLogoProps> = ({
             className={`font-heading font-black ${textSizeClasses[size]} tracking-tight leading-none`}
             style={{ color: colors.text }}
           >
-            ZENI<span style={{ color: colors.primary }}>CORP</span>
+            ZENI<span style={{ color: colors.primary }}>VA</span>
           </span>
           {size !== 'sm' && (
             <span 
@@ -153,4 +153,4 @@ const ZeniCorpLogo: React.FC<ZeniCorpLogoProps> = ({
   );
 };
 
-export default ZeniCorpLogo;
+export default ZenivaLogo;

@@ -125,7 +125,7 @@ export default function ToiturePage() {
     doc.setTextColor(249, 115, 22);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(28);
-    doc.text('ZENICORP', centerX, 25, { align: 'center' });
+    doc.text('ZENIVA', centerX, 25, { align: 'center' });
     
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(16);
@@ -195,7 +195,7 @@ export default function ToiturePage() {
     doc.line(20, 300, pageWidth - 20, 300);
     doc.text('zenicorp-toiture.vercel.app  |  581-748-7017', centerX, 310, { align: 'center' });
 
-    doc.save(`devis-zenicorp-toiture-${now.getTime()}.pdf`);
+    doc.save(`devis-zeniva-toiture-${now.getTime()}.pdf`);
   };
 
   if (!mounted) return null;
@@ -207,9 +207,9 @@ export default function ToiturePage() {
       <header className="fixed top-0 left-0 right-0 z-50 px-2 sm:px-4 py-2 sm:py-3 backdrop-blur-xl bg-black/50 border-b border-white/10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="ZeniCorp" className="w-7 h-7 sm:w-8 sm:h-8 object-contain flex-shrink-0" />
+            <img src="/logo.png" alt="Zeniva" className="w-7 h-7 sm:w-8 sm:h-8 object-contain flex-shrink-0" />
             <div className="leading-none">
-              <div className="font-bold text-sm sm:text-base tracking-tight">ZENI<span className="text-orange-400">CORP</span></div>
+              <div className="font-bold text-sm sm:text-base tracking-tight">ZENI<span className="text-orange-400">VA</span></div>
               <div className="text-[8px] sm:text-[9px] text-white/40 tracking-widest uppercase">Toiture Pro</div>
             </div>
           </div>
@@ -249,7 +249,7 @@ export default function ToiturePage() {
             </div>
 
             <h1 className="text-6xl sm:text-7xl md:text-9xl font-black leading-[0.85] tracking-tighter mb-6">
-              <span className="block text-white">ZENICORP</span>
+              <span className="block text-white">ZENIVA</span>
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-400 to-amber-300">TOITURE</span>
             </h1>
 
@@ -711,8 +711,8 @@ export default function ToiturePage() {
       <footer className="py-8 px-4 sm:px-6 border-t border-white/10 bg-[#0f0a0a]">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <img src="/logo.png" alt="ZeniCorp" className="w-8 h-8 object-contain" />
-            <span className="font-bold text-xl">ZENICORP TOITURE</span>
+            <img src="/logo.png" alt="Zeniva" className="w-8 h-8 object-contain" />
+            <span className="font-bold text-xl">ZENIVA TOITURE</span>
           </div>
           <p className="text-2xl font-black text-orange-400 mb-2">581-748-7017</p>
           <p className="text-white/40">Garantie 10-50 ans - Prix: $5.50 - $15.00/pied carre</p>
