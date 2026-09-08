@@ -125,7 +125,7 @@ export default function ToiturePage() {
     doc.setTextColor(249, 115, 22);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(28);
-    doc.text('ZENIVA', centerX, 25, { align: 'center' });
+    doc.text('ZENICORP', centerX, 25, { align: 'center' });
     
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(16);
@@ -193,7 +193,7 @@ export default function ToiturePage() {
     doc.setDrawColor(249, 115, 22);
     doc.setLineWidth(1);
     doc.line(20, 300, pageWidth - 20, 300);
-    doc.text('zenicorp-toiture.vercel.app  |  581-748-7017', centerX, 310, { align: 'center' });
+    doc.text('zenicorptoiture.zeniva.ca  |  581-748-7017', centerX, 310, { align: 'center' });
 
     doc.save(`devis-zeniva-toiture-${now.getTime()}.pdf`);
   };
@@ -249,7 +249,7 @@ export default function ToiturePage() {
             </div>
 
             <h1 className="text-6xl sm:text-7xl md:text-9xl font-black leading-[0.85] tracking-tighter mb-6">
-              <span className="block text-white">ZENIVA</span>
+              <span className="block text-white">ZENICORP</span>
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-400 to-amber-300">TOITURE</span>
             </h1>
 
@@ -607,8 +607,8 @@ export default function ToiturePage() {
                               total_amount: getProjectTotal(),
                               deposit_amount: getDepositAmount()
                             },
-                            success_url: 'https://zenicorp-toiture.vercel.app/paiement/success',
-                            cancel_url: 'https://zenicorp-toiture.vercel.app/paiement/annule'
+                            success_url: 'https://zenicorptoiture.zeniva.ca/paiement/success',
+                            cancel_url: 'https://zenicorptoiture.zeniva.ca/paiement/annule'
                           };
                           try {
                             const response = await fetch('https://api.zenipay.ca/v1/checkout/sessions', {
