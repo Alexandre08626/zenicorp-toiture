@@ -1,734 +1,518 @@
-﻿'use client';
+'use client';
 
-import { useState, useEffect } from 'react';
-import { Phone, Check, ArrowRight, Calculator, MapPin, Clock, Shield, X, Package } from 'lucide-react';
-import { jsPDF } from 'jspdf';
+import { useEffect, useState } from 'react';
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Award,
+  Check,
+  Clock,
+  Loader2,
+  MapPin,
+  Package,
+  Phone,
+  Plus,
+  ShieldCheck,
+  X,
+} from 'lucide-react';
+import { SITE } from '@/site';
+import type { Img } from '@/types';
+import { DIVISIONS, PHONE, PHONE_HREF, EMAIL, fmtRate } from '@/lib/contact';
+import { sendLead, validateContact } from '@/lib/lead';
+import Estimator from '@/components/Estimator';
+import ShopModal from '@/components/ShopModal';
 
-export default function ToiturePage() {
-  const [mounted, setMounted] = useState(false);
-  const [showQuote, setShowQuote] = useState(false);
-  const [showShop, setShowShop] = useState(false);
-  
-  useEffect(() => { setMounted(true); }, []);
+const ICONS = { shield: ShieldCheck, map: MapPin, clock: Clock, award: Award };
 
-  const [sqft, setSqft] = useState('');
-  const [finishType, setFinishType] = useState<'bardeaux' | 'metal'>('bardeaux');
-  const pricePerSqft = finishType === 'bardeaux' ? 5.50 : 8.50;
-  const estimatedTotal = sqft ? parseFloat(sqft) * pricePerSqft : 0;
-  const [clientName, setClientName] = useState('');
-  const [clientPhone, setClientPhone] = useState('');
-  const [clientEmail, setClientEmail] = useState('');
-  
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxImage, setLightboxImage] = useState({ src: '', alt: '' });
-  
-  const openLightbox = (src: string, alt: string) => {
-    setLightboxImage({ src, alt });
-    setLightboxOpen(true);
-  };
-  
-  const closeLightbox = () => {
-    setLightboxOpen(false);
-    setLightboxImage({ src: '', alt: '' });
-  };
-  
-  const [shopStep, setShopStep] = useState(1);
-  const [projectSqft, setProjectSqft] = useState('');
-  const [projectFinish, setProjectFinish] = useState<'bardeaux' | 'metal' | null>(null);
-  const [projectOption, setProjectOption] = useState('');
-  const [installDate, setInstallDate] = useState('');
-  const [paymentProcessing, setPaymentProcessing] = useState(false);
-  
-  const resetShop = () => {
-    setShopStep(1);
-    setProjectSqft('');
-    setProjectFinish(null);
-    setProjectOption('');
-    setInstallDate('');
-    setPaymentProcessing(false);
-  };
-  
-  const getPricePerSqft = () => {
-    if (projectFinish === 'bardeaux') return 5.50;
-    return 8.50;
-  };
-  
-  const getProjectTotal = () => {
-    const sqftNum = parseFloat(projectSqft) || 0;
-    return sqftNum * getPricePerSqft();
-  };
-  
-  const getDepositAmount = () => {
-    return getProjectTotal() * 0.30;
-  };
-  
-  const bardeauxOptions = [
-    { name: 'Bardeaux Standard', image: '/images/toiture-bardeaux.jpg', price: 5.50 },
-    { name: 'Bardeaux Architecturaux', image: '/images/toiture-bardeaux.jpg', price: 6.50 },
-    { name: 'Bardeaux Premium', image: '/images/toiture-bardeaux.jpg', price: 7.50 },
-  ];
-  
-  const metalOptions = [
-    { name: 'Tole Acier', image: '/images/toiture-metal.jpg', price: 8.50 },
-    { name: 'Tole Aluminum', image: '/images/toiture-metal.jpg', price: 10.00 },
-    { name: 'Tole Cuivre', image: '/images/toiture-metal.jpg', price: 15.00 },
-  ];
+export default function Home() {
+  const [shop, setShop] = useState(false);
+  const [lightbox, setLightbox] = useState<Img | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const minPrice = Math.min(...SITE.calc.finishes.map((f) => f.price));
 
-  const submitLeadToDashboard = async () => {
-    const surface = Number.parseFloat(sqft || '0');
-    const total = surface * pricePerSqft;
-    const finishLabel = finishType === 'bardeaux' ? 'Bardeaux' : 'Tole metallique';
-    
-    const leadData = {
-      name: clientName,
-      phone: clientPhone,
-      email: clientEmail,
-      service: 'toiture',
-      surface: surface,
-      finishType: finishLabel,
-      estimatedTotal: total,
-      source: 'website-calculator',
-      date: new Date().toISOString()
-    };
-    
-    try {
-      await fetch('https://zeniva-dev-dashboard.vercel.app/api/leads/toiture', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(leadData)
-      });
-    } catch (e) {
-      console.error('Lead submission error:', e);
-    }
-  };
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 24);
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
 
-  const downloadQuotePdf = async () => {
-    const surface = Number.parseFloat(sqft || '0');
-    const total = surface * pricePerSqft;
-    const finishLabel = finishType === 'bardeaux' ? 'Bardeaux d\'asphalte' : 'Tole metallique';
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
-
-    await submitLeadToDashboard();
-
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const centerX = pageWidth / 2;
-    
-    doc.setFillColor(15, 10, 10);
-    doc.rect(0, 0, pageWidth, 50, 'F');
-    
-    doc.setDrawColor(249, 115, 22);
-    doc.setLineWidth(2);
-    doc.line(0, 50, pageWidth, 50);
-    
-    doc.setTextColor(249, 115, 22);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(28);
-    doc.text('ZENICORP', centerX, 25, { align: 'center' });
-    
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(16);
-    doc.text('TOITURE PRO', centerX, 38, { align: 'center' });
-    
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(24);
-    doc.text('DEVIS TOITURE', centerX, 70, { align: 'center' });
-    
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Date: ${dateStr}`, 20, 82);
-    doc.text('Tel: 581-748-7017', pageWidth - 20, 82, { align: 'right' });
-    
-    doc.setFillColor(248, 250, 252);
-    doc.roundedRect(15, 95, pageWidth - 30, 35, 3, 3, 'F');
-    doc.setTextColor(0, 0, 0);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text('CLIENT', 20, 105);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    doc.text(`Nom: ${clientName || '_______________________________'}`, 20, 115);
-    doc.text(`Telephone: ${clientPhone || '_______________________________'}`, 20, 123);
-    doc.text(`Courriel: ${clientEmail || '_______________________________'}`, pageWidth - 20, 123, { align: 'right' });
-    
-    doc.setFillColor(248, 250, 252);
-    doc.roundedRect(15, 140, pageWidth - 30, 45, 3, 3, 'F');
-    doc.setTextColor(0, 0, 0);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text('DETAILS DU PROJET', 20, 150);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    doc.text(`Type de couverture: ${finishLabel}`, 20, 162);
-    doc.text(`Surface totale: ${surface.toFixed(2)} pieds carres`, 20, 170);
-    doc.text(`Taux unitaire: $${pricePerSqft.toFixed(2)} / pied carre`, 20, 178);
-    
-    doc.setFillColor(249, 115, 22);
-    doc.roundedRect(15, 200, pageWidth - 30, 30, 5, 5, 'F');
-    doc.setTextColor(0, 0, 0);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.text('TOTAL ESTIME:', 25, 215);
-    doc.setFontSize(22);
-    doc.text(`$${total.toFixed(2)}`, pageWidth - 25, 218, { align: 'right' });
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text(' taxes incluses', pageWidth - 25, 225, { align: 'right' });
-    
-    doc.setTextColor(60, 60, 60);
-    doc.setFontSize(10);
-    doc.text('âœ“ Garantie 10-50 ans', 20, 250);
-    doc.text('âœ“ Service d\'urgence 24/7', 20, 258);
-    doc.text('âœ“ Entrepreneurs certifies RBQ', 20, 266);
-    
-    doc.setTextColor(120, 120, 120);
-    doc.setFontSize(9);
-    doc.text('Ce devis est une estimation preliminaire basee sur les informations fournies.', centerX, 285, { align: 'center' });
-    doc.text('Une visite sur place sera necessaire pour confirmer le prix final.', centerX, 292, { align: 'center' });
-    
-    doc.setDrawColor(249, 115, 22);
-    doc.setLineWidth(1);
-    doc.line(20, 300, pageWidth - 20, 300);
-    doc.text('zenicorptoiture.zeniva.ca  |  581-748-7017', centerX, 310, { align: 'center' });
-
-    doc.save(`devis-zeniva-toiture-${now.getTime()}.pdf`);
-  };
-
-  if (!mounted) return null;
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setLightbox(null);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightbox]);
 
   return (
-    <div className="min-h-screen bg-[#0f0a0a] text-white overflow-hidden">
-      
-      {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 px-2 sm:px-4 py-2 sm:py-3 backdrop-blur-xl bg-black/50 border-b border-white/10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Zeniva" className="w-7 h-7 sm:w-8 sm:h-8 object-contain flex-shrink-0" />
-            <div className="leading-none">
-              <div className="font-bold text-sm sm:text-base tracking-tight">ZENI<span className="text-orange-400">VA</span></div>
-              <div className="text-[8px] sm:text-[9px] text-white/40 tracking-widest uppercase">Toiture Pro</div>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-1 sm:gap-2 md:gap-4">
-            <button 
-              onClick={() => setShowShop(true)}
-              className="relative flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 transition-colors"
-            >
-              <Package className="w-4 h-4" />
-              <span className="hidden sm:inline text-sm">Configurer</span>
-            </button>
+    <div className="overflow-x-clip pb-20 lg:pb-0">
+      {/* ═══════════════ HEADER ═══════════════ */}
+      <header
+        className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-500 ${
+          scrolled ? 'border-[rgba(120,160,255,0.14)] bg-[rgba(5,7,11,0.75)] backdrop-blur-xl' : 'border-transparent'
+        }`}
+      >
+        <div className={`wrap flex items-center justify-between gap-3 transition-all duration-500 ${scrolled ? 'h-16' : 'h-[4.5rem]'}`}>
+          <a href="#top" className="flex items-center gap-2.5" aria-label={`${SITE.name}, haut de page`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="" className="h-9 w-9 rounded-[10px] object-contain ring-1 ring-white/15" />
+            <span className="leading-none">
+              <span className="block font-heading text-base font-black tracking-tight text-white">
+                ZENI<span className="grad-accent">VA</span>
+              </span>
+              <span className="mt-1 block font-mono text-[9px] uppercase tracking-[0.26em] text-white/50">{SITE.tagline}</span>
+            </span>
+          </a>
 
-            <a 
-              href="tel:5817487017"
-              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl text-xs sm:text-sm font-bold hover:scale-105 transition-transform"
-            >
-              <Phone className="w-4 h-4" />
-              <span className="hidden md:inline">581-748-7017</span>
+          <nav className="hidden items-center gap-1 lg:flex">
+            {[
+              ['#estimation', 'Estimation'],
+              ['#vitrine', SITE.showcase.eyebrow],
+              ['#realisations', 'Réalisations'],
+              ['#faq', 'FAQ'],
+            ].map(([h, l]) => (
+              <a key={h} href={h} className="rounded-[10px] px-3.5 py-2.5 text-[0.86rem] font-semibold text-z-dim transition-colors hover:bg-[rgba(120,160,255,0.08)] hover:text-white">
+                {l}
+              </a>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <button onClick={() => setShop(true)} className="btn-ghost hidden px-4 py-2.5 sm:inline-flex">
+              <Package className="h-4 w-4 text-accent" /> Configurer
+            </button>
+            <a href={PHONE_HREF} className="btn-ghost px-3.5 py-2.5 font-mono text-[0.8rem]" aria-label={`Appeler le ${PHONE}`}>
+              <Phone className="h-4 w-4 text-accent" />
+              <span className="hidden md:inline">{PHONE}</span>
+            </a>
+            <a href="#estimation" className="btn-main hidden px-5 py-2.5 sm:inline-flex">
+              Devis gratuit <ArrowRight className="h-4 w-4" />
             </a>
           </div>
         </div>
       </header>
 
-      {/* HERO */}
-      <section className="relative h-screen flex flex-col justify-end pb-20">
-        <div className="absolute inset-0">
-          <img src="/images/toiture-hero.jpg" alt="Toiture" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f0a0a] via-[#0f0a0a]/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0f0a0a]/80 via-transparent to-transparent" />
+      {/* ═══════════════ HERO ═══════════════ */}
+      <section id="top" className="relative">
+        {/* Photo en fond, fondue vers la gauche et le bas */}
+        <div aria-hidden className="absolute inset-0 -z-[1] overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={SITE.hero.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-55" />
+          <div className="absolute inset-0 bg-gradient-to-r from-z-void via-z-void/85 to-z-void/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-z-void via-z-void/20 to-z-void/60" />
+          <div className="absolute inset-0 bp-grid opacity-60" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 w-full">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-6">
-              <span className="text-sm font-medium">Experts en toiture residentielle & commerciale</span>
-            </div>
+        <div className="wrap grid items-center gap-10 pb-16 pt-28 sm:pt-32 lg:min-h-[100svh] lg:grid-cols-12 lg:gap-12 lg:pb-20">
+          <div className="min-w-0 lg:col-span-7">
+            <span className="chip">
+              <span className="chip-dot" />
+              {SITE.hero.eyebrow}
+            </span>
 
-            <h1 className="text-6xl sm:text-7xl md:text-9xl font-black leading-[0.85] tracking-tighter mb-6">
-              <span className="block text-white">ZENICORP</span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-400 to-amber-300">TOITURE</span>
+            <h1 className="mt-6 font-heading text-[clamp(2.4rem,5vw,4.3rem)] font-black leading-[0.98] tracking-[-0.035em] text-white">
+              {SITE.hero.h1a}
+              <br />
+              <span className="grad-accent">{SITE.hero.h1b}</span>
             </h1>
 
-            <p className="text-lg sm:text-xl md:text-2xl text-white/70 mb-8 max-w-xl leading-relaxed">
-              Toiture neuve, reparation et inspection. Materiaux haut de gamme.
-              <span className="text-orange-400 font-semibold"> Garantie 10-50 ans.</span>
-            </p>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-z-dim sm:text-xl">{SITE.hero.sub}</p>
 
-            <div className="flex flex-wrap gap-3 sm:gap-4 mb-12">
-              <button 
-                onClick={() => setShowQuote(true)}
-                className="group flex items-center gap-2 sm:gap-3 px-6 sm:px-10 py-4 sm:py-5 bg-orange-500 hover:bg-orange-400 text-black font-black text-base sm:text-lg rounded-full transition-all hover:scale-105 shadow-2xl shadow-orange-500/50"
-              >
-                DEVIS GRATUIT
-                <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform" />
-              </button>
-              
-              <button 
-                onClick={() => setShowShop(true)}
-                className="flex items-center gap-2 sm:gap-3 px-5 sm:px-8 py-4 sm:py-5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white font-bold text-base sm:text-lg rounded-full transition-all"
-              >
-                <Calculator className="w-5 h-5 sm:w-6 sm:h-6" />
-                Configurer
-              </button>
+            <ul className="mt-7 flex flex-wrap gap-x-6 gap-y-3">
+              {SITE.hero.trust.map(({ icon, t }) => {
+                const I = ICONS[icon];
+                return (
+                  <li key={t} className="flex items-center gap-2 text-sm font-medium text-white/85">
+                    <I className="h-[18px] w-[18px] text-accent" />
+                    {t}
+                  </li>
+                );
+              })}
+            </ul>
 
-              <a 
-                href="tel:5817487017"
-                className="flex items-center gap-2 sm:gap-3 px-5 sm:px-8 py-4 sm:py-5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white font-bold text-base sm:text-lg rounded-full transition-all"
-              >
-                <Phone className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="sm:hidden">Appeler</span>
-                <span className="hidden sm:inline">581-748-7017</span>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <a href="#estimation" className="btn-main py-4 text-base lg:hidden">
+                Estimer mon projet <ArrowRight className="h-4 w-4" />
+              </a>
+              <button onClick={() => setShop(true)} className="btn-ghost py-4 text-base">
+                <Package className="h-4 w-4 text-accent" /> Configurer et réserver
+              </button>
+              <a href={PHONE_HREF} className="btn-ghost py-4 font-mono text-base">
+                <Phone className="h-4 w-4 text-accent" /> {PHONE}
               </a>
             </div>
 
-            <div className="flex flex-wrap items-center gap-6 sm:gap-8 text-sm">
-              <div className="flex items-center gap-2 text-white/60">
-                <Shield className="w-5 h-5 text-orange-400" />
-                <span>Garantie 10-50 ans</span>
-              </div>
-              <div className="flex items-center gap-2 text-white/60">
-                <MapPin className="w-5 h-5 text-orange-400" />
-                <span>Partout au Québec</span>
-              </div>
-              <div className="flex items-center gap-2 text-white/60">
-                <Clock className="w-5 h-5 text-orange-400" />
-                <span>Urgence 24/7</span>
-              </div>
-            </div>
+            <dl className="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-[rgba(120,160,255,0.14)] pt-6">
+              {[
+                { k: fmtRate(minPrice), l: 'À partir de /pi²' },
+                { k: 'RBQ', l: 'Entrepreneur certifié' },
+                { k: '24 h', l: 'Rappel garanti' },
+              ].map((m) => (
+                <div key={m.l} className="flex flex-col gap-1">
+                  <dt className="order-2 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-z-faint">{m.l}</dt>
+                  <dd className="order-1 font-heading text-2xl font-extrabold tracking-tight text-white sm:text-[1.7rem]">{m.k}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
+          <div className="min-w-0 scroll-mt-24 lg:col-span-5">
+            <Estimator />
           </div>
         </div>
       </section>
 
-      {/* CALCULATEUR */}
-      <section className="py-20 px-4 sm:px-6 bg-[#120d0d]">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-black text-center mb-4">Calculateur de <span className="text-orange-400">Devis Toiture</span></h2>
-          <p className="text-white/60 text-center mb-12">Estimez le cout de votre toiture en quelques secondes</p>
-          
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 sm:p-12">
-            <div className="mb-8">
-              <p className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4">Type de couverture</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button 
-                  onClick={() => setFinishType('bardeaux')}
-                  className={`p-6 rounded-2xl border-2 transition-all text-left ${finishType === 'bardeaux' ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
-                >
-                  <div className="font-bold text-xl mb-2">Bardeaux d'asphalte</div>
-                  <div className="text-3xl font-black text-orange-400">$5.50<span className="text-base text-white/60 font-normal">/piedÂ²</span></div>
-                  <p className="text-sm text-white/40 mt-2">Classique, durable, garantie 25 ans</p>
-                </button>
+      {/* ═══════════════ TICKER ═══════════════ */}
+      <div className="relative overflow-hidden border-y border-[rgba(120,160,255,0.14)] bg-z-noir/60 py-4 mask-fade-edges" aria-hidden>
+        <div className="flex w-max animate-marquee gap-11 hover:[animation-play-state:paused]">
+          {[...SITE.ticker, ...SITE.ticker, ...SITE.ticker, ...SITE.ticker].map((s, i) => (
+            <span key={i} className="flex items-center gap-4 whitespace-nowrap font-mono text-[0.8rem] font-medium tracking-[0.05em] text-z-dim">
+              {s}
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+            </span>
+          ))}
+        </div>
+      </div>
 
-                <button 
-                  onClick={() => setFinishType('metal')}
-                  className={`p-6 rounded-2xl border-2 transition-all text-left ${finishType === 'metal' ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
-                >
-                  <div className="font-bold text-xl mb-2">Tole metallique</div>
-                  <div className="text-3xl font-black text-orange-400">$8.50<span className="text-base text-white/60 font-normal">/piedÂ²</span></div>
-                  <p className="text-sm text-white/40 mt-2">Duree de vie 50 ans, entretien minime</p>
-                </button>
+      {/* ═══════════════ AVANTAGES ═══════════════ */}
+      <section className="sec">
+        <div className="wrap">
+          <div data-reveal className="max-w-2xl">
+            <span className="eyebrow">Pourquoi Zeniva</span>
+            <h2 className="h2 mt-5">
+              Un travail propre. <span className="grad-accent">Un prix clair.</span>
+            </h2>
+          </div>
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {SITE.benefits.map((b, i) => (
+              <div key={b.t} data-reveal style={{ ['--rd' as string]: `${i * 70}ms` }} className="spot panel relative overflow-hidden p-7">
+                <span aria-hidden className="absolute -bottom-16 -right-16 h-44 w-44 rounded-full opacity-30 blur-2xl" style={{ background: 'radial-gradient(circle, var(--accent), transparent 70%)' }} />
+                <p className="relative font-heading text-4xl font-black tracking-tight text-white">{b.k}</p>
+                <p className="relative mt-3 font-mono text-label uppercase text-accent">{b.t}</p>
+                <p className="relative mt-2 text-sm leading-relaxed text-z-dim">{b.d}</p>
               </div>
-            </div>
-
-            <div className="mb-8">
-              <label className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4 block">Superficie (pieds carres)</label>
-              <input 
-                type="number"
-                value={sqft}
-                onChange={(e) => setSqft(e.target.value)}
-                placeholder="Ex: 2000"
-                className="w-full px-6 py-5 bg-white/5 border border-white/20 rounded-2xl text-white text-2xl font-bold focus:border-orange-500 focus:outline-none"
-              />
-            </div>
-
-            <div className="p-8 bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-2xl mb-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white/60 text-sm">Estimation totale</p>
-                  <p className="text-5xl font-black text-white">${estimatedTotal.toFixed(2)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-white/60 text-sm">Prix au pied carre</p>
-                  <p className="text-2xl font-bold text-orange-400">${pricePerSqft.toFixed(2)}</p>
-                </div>
-              </div>
-            </div>
-
-            <button 
-              onClick={() => setShowQuote(true)}
-              className="w-full py-5 bg-orange-500 hover:bg-orange-400 text-black font-black text-xl rounded-2xl transition-all hover:scale-105 flex items-center justify-center gap-3"
-            >
-              <Calculator className="w-6 h-6" />
-              TELECHARGER DEVIS PDF
-            </button>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* MATERIAUX */}
-      <section className="py-20 px-4 sm:px-6 bg-[#0f0a0a]">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-black text-center mb-4">Nos <span className="text-orange-400">Materiaux</span></h2>
-          <p className="text-white/60 text-center mb-12 max-w-2xl mx-auto">
-            Choix de qualite pour votre toiture. Garantie eteinte sur tous nos produits.
-          </p>
+      {/* ═══════════════ VITRINES ═══════════════ */}
+      <Showcase id="vitrine" data={SITE.showcase} onOpen={setLightbox} />
+      {SITE.showcase2 && <Showcase data={SITE.showcase2} onOpen={setLightbox} />}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="group cursor-pointer" onClick={() => openLightbox('/images/toiture-bardeaux.jpg', 'Bardeaux')}>
-              <div className="aspect-[4/3] rounded-3xl overflow-hidden mb-4">
-                <img src="/images/toiture-bardeaux.jpg" alt="Bardeaux" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-              </div>
-              <h3 className="text-xl font-bold text-center">Bardeaux d'asphalte</h3>
-              <p className="text-orange-400 text-center">$5.50 - $7.50 / piedÂ²</p>
+      {/* ═══════════════ PROCESSUS ═══════════════ */}
+      <section className="relative border-t border-[rgba(120,160,255,0.1)]">
+        <div aria-hidden className="hazard h-2 w-full opacity-80" />
+        <div className="wrap sec">
+          <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
+            <div data-reveal className="lg:col-span-5">
+              <span className="eyebrow">Comment ça marche</span>
+              <h2 className="h2 mt-5">
+                Trois étapes. <span className="grad-build">Zéro casse-tête.</span>
+              </h2>
+              <p className="lead mt-5 max-w-md">De l&apos;estimation en ligne au plancher, au toit ou au terrain terminé : un seul interlocuteur du début à la fin.</p>
+              <a href="#estimation" className="btn-main mt-8">
+                Obtenir mon prix <ArrowRight className="h-4 w-4" />
+              </a>
             </div>
-            
-            <div className="group cursor-pointer" onClick={() => openLightbox('/images/toiture-metal.jpg', 'Tole metallique')}>
-              <div className="aspect-[4/3] rounded-3xl overflow-hidden mb-4">
-                <img src="/images/toiture-metal.jpg" alt="Tole metallique" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-              </div>
-              <h3 className="text-xl font-bold text-center">Tole metallique</h3>
-              <p className="text-orange-400 text-center">$8.50 - $15.00 / piedÂ²</p>
-            </div>
+            <ol className="grid gap-3 lg:col-span-7">
+              {[
+                { t: 'Estimation en ligne', d: 'Choisissez votre option et votre surface : le prix s’affiche en direct. Devis PDF immédiat.' },
+                { t: 'Visite et prix ferme', d: 'Un conseiller vous rappelle sous 24 h, planifie la visite et confirme le prix final.' },
+                { t: 'Travaux exécutés', d: 'Entrepreneur certifié RBQ, chantier propre, garantie écrite à la fin des travaux.' },
+              ].map((s, i) => (
+                <li key={s.t} data-reveal style={{ ['--rd' as string]: `${i * 80}ms` }} className="spot panel flex gap-5 p-6">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] border border-accent/50 bg-z-noir font-mono text-sm font-bold text-accent">
+                    0{i + 1}
+                  </span>
+                  <div>
+                    <h3 className="font-heading text-lg font-extrabold text-white sm:text-xl">{s.t}</h3>
+                    <p className="mt-1.5 text-[0.95rem] leading-relaxed text-z-dim">{s.d}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
+        <div aria-hidden className="hazard h-2 w-full opacity-80" />
       </section>
 
-      {/* REALISATIONS */}
-      <section className="py-20 px-4 sm:px-6 bg-[#120d0d]">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-black text-center mb-12">Nos <span className="text-orange-400">Realisations</span></h2>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden group cursor-pointer" onClick={() => openLightbox('/images/toiture-realisation-1.jpg', 'Residentiel')}>
-              <img src="/images/toiture-realisation-1.jpg" alt="Residentiel" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-              <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-8">
-                <p className="text-2xl sm:text-3xl font-black text-white">Residentiel</p>
-                <p className="text-orange-400">Toiture neuve</p>
-              </div>
+      {/* ═══════════════ RÉALISATIONS ═══════════════ */}
+      <section id="realisations" className="sec scroll-mt-16">
+        <div className="wrap">
+          <div data-reveal className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <span className="eyebrow">Réalisations</span>
+              <h2 className="h2 mt-5">
+                Le résultat <span className="grad-accent">parle de lui-même.</span>
+              </h2>
             </div>
-
-            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden group cursor-pointer" onClick={() => openLightbox('/images/toiture-realisation-2.jpg', 'Commercial')}>
-              <img src="/images/toiture-realisation-2.jpg" alt="Commercial" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-              <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-8">
-                <p className="text-2xl sm:text-3xl font-black text-white">Commercial</p>
-                <p className="text-orange-400">Grande surface</p>
-              </div>
-            </div>
+            <p className="max-w-sm text-sm text-z-faint">Cliquez sur une photo pour l&apos;agrandir.</p>
           </div>
-        </div>
-      </section>
-
-      {/* SHOP MODAL - CONFIGURATEUR */}
-      {showShop && (
-        <div
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6"
-          onClick={() => { setShowShop(false); resetShop(); }}
-        >
-          <div
-            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-900 rounded-3xl border border-white/10 p-6 sm:p-8"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl sm:text-3xl font-black">Configurer votre toiture</h2>
-                <button onClick={() => { setShowShop(false); resetShop(); }} className="p-2 hover:bg-white/10 rounded-full"><X className="w-6 h-6" /></button>
-              </div>
-              <div className="flex items-center gap-2">
-                {[1, 2, 3, 4, 5].map((step) => (
-                  <div key={step} className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
-                    <div className={`h-full rounded-full transition-all duration-300 ${shopStep >= step ? 'bg-orange-400' : 'bg-transparent'}`} />
-                  </div>
-                ))}
-              </div>
-              <p className="text-white/60 text-sm mt-2">Etape {shopStep} sur 5</p>
-            </div>
-
-            {shopStep === 1 && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-bold text-center">Quelle est la surface a couvrir?</h3>
-                <div className="space-y-4">
-                  <input
-                    type="number"
-                    value={projectSqft}
-                    onChange={(e) => setProjectSqft(e.target.value)}
-                    placeholder="Nombre de pieds carres (ex: 2000)"
-                    className="w-full px-6 py-5 bg-white/5 border-2 border-white/20 rounded-2xl text-white text-2xl font-bold text-center focus:border-orange-500 focus:outline-none"
-                  />
-                  <p className="text-white/40 text-center text-sm">
-                    Prix : $5.50 - $15.00 / pied carre selon la couverture choisie
-                  </p>
-                </div>
-                <button
-                  onClick={() => projectSqft && parseFloat(projectSqft) > 0 && setShopStep(2)}
-                  disabled={!projectSqft || parseFloat(projectSqft) <= 0}
-                  className="w-full py-5 bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-black font-black text-xl rounded-2xl transition-all"
-                >
-                  CONTINUER
-                </button>
-              </div>
-            )}
-
-            {shopStep === 2 && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-bold text-center">Choisissez votre couverture</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <button
-                    onClick={() => { setProjectFinish('bardeaux'); setShopStep(3); }}
-                    className={`p-6 rounded-2xl border-2 transition-all text-left ${projectFinish === 'bardeaux' ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-white/5 hover:border-white/30'}`}
-                  >
-                    <div className="font-bold text-xl mb-2">Bardeaux d'asphalte</div>
-                    <div className="text-3xl font-black text-orange-400">$5.50<span className="text-base text-white/60 font-normal">/piedÂ²</span></div>
-                    <p className="text-sm text-white/40 mt-2">Classique, durable, garantie 25 ans</p>
-                  </button>
-
-                  <button
-                    onClick={() => { setProjectFinish('metal'); setShopStep(3); }}
-                    className={`p-6 rounded-2xl border-2 transition-all text-left ${projectFinish === 'metal' ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-white/5 hover:border-white/30'}`}
-                  >
-                    <div className="font-bold text-xl mb-2">Tole metallique</div>
-                    <div className="text-3xl font-black text-orange-400">$8.50<span className="text-base text-white/60 font-normal">/piedÂ²</span></div>
-                    <p className="text-sm text-white/40 mt-2">Duree de vie 50 ans, entretien minime</p>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {shopStep === 3 && projectFinish && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-bold text-center">
-                  {projectFinish === 'bardeaux' ? 'Choisissez vos bardeaux' : 'Choisissez votre tole'}
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto">
-                  {(projectFinish === 'bardeaux' ? bardeauxOptions : metalOptions).map((option) => (
-                    <button
-                      key={option.name}
-                      onClick={() => { setProjectOption(option.name); setShopStep(4); }}
-                      className={`p-3 rounded-xl border-2 transition-all ${projectOption === option.name ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-white/5 hover:border-white/30'}`}
-                    >
-                      <div className="aspect-square rounded-lg overflow-hidden mb-2">
-                        <img src={option.image} alt={option.name} className="w-full h-full object-cover" />
-                      </div>
-                      <p className="font-bold text-sm">{option.name}</p>
-                      <p className="text-orange-400 text-xs">{option.price.toFixed(2)} $/piedÂ²</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {shopStep === 4 && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-bold text-center">Quand souhaitez-vous la pose?</h3>
-                <div className="space-y-4">
-                  <input
-                    type="date"
-                    value={installDate}
-                    onChange={(e) => setInstallDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-6 py-5 bg-white/5 border-2 border-white/20 rounded-2xl text-white text-xl font-bold text-center focus:border-orange-500 focus:outline-none"
-                  />
-                  <p className="text-white/40 text-center text-sm">
-                    Pose effectuee dans les plus brefs delais
-                  </p>
-                </div>
-                <button
-                  onClick={() => installDate && setShopStep(5)}
-                  disabled={!installDate}
-                  className="w-full py-5 bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-black font-black text-xl rounded-2xl transition-all"
-                >
-                  VOIR LE RECAPITULATIF
-                </button>
-              </div>
-            )}
-
-            {shopStep === 5 && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-bold text-center">Recapitulatif de votre projet</h3>
-                <div className="bg-white/5 rounded-2xl p-6 space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-white/60">Surface</span>
-                    <span className="font-bold">{projectSqft} pieds carres</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/60">Couverture</span>
-                    <span className="font-bold">{projectFinish === 'bardeaux' ? 'Bardeaux' : 'Tole'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/60">Materiau</span>
-                    <span className="font-bold">{projectOption}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/60">Date souhaitee</span>
-                    <span className="font-bold">{installDate ? new Date(installDate).toLocaleDateString('fr-CA') : '-'}</span>
-                  </div>
-                  <div className="border-t border-white/10 pt-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/60">Total projet</span>
-                      <span className="text-2xl font-black text-orange-400">${getProjectTotal().toFixed(2)}</span>
-                    </div>
-                  </div>
-                  <div className="bg-orange-500/10 rounded-xl p-4 border border-orange-500/30">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="text-white font-bold">Acompte a payer (30%)</span>
-                        <p className="text-xs text-white/60">Solde payable apres la pose</p>
-                      </div>
-                      <span className="text-3xl font-black text-orange-400">${getDepositAmount().toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="text-lg font-bold text-center">Payer avec Zenipay</h4>
-                  {paymentProcessing ? (
-                    <div className="text-center py-8">
-                      <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                      <p className="text-white/60">Connexion a Zenipay...</p>
-                    </div>
-                  ) : (
-                    <>
-                      <button
-                        onClick={async () => {
-                          setPaymentProcessing(true);
-                          const paymentData = {
-                            amount: getDepositAmount(),
-                            currency: 'CAD',
-                            description: `Acompte Projet Toiture - ${projectOption} (${projectSqft} pÂ²)`,
-                            metadata: {
-                              project_surface: projectSqft,
-                              project_finish: projectFinish,
-                              project_option: projectOption,
-                              install_date: installDate,
-                              total_amount: getProjectTotal(),
-                              deposit_amount: getDepositAmount()
-                            },
-                            success_url: 'https://zenicorptoiture.zeniva.ca/paiement/success',
-                            cancel_url: 'https://zenicorptoiture.zeniva.ca/paiement/annule'
-                          };
-                          try {
-                            const response = await fetch('https://api.zenipay.ca/v1/checkout/sessions', {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${process.env.NEXT_PUBLIC_ZENIPAY_PUBLIC_KEY}`
-                              },
-                              body: JSON.stringify(paymentData)
-                            });
-                            const result = await response.json();
-                            if (result.url) {
-                              window.location.href = result.url;
-                            } else {
-                              alert('Erreur de connexion a Zenipay. Veuillez reessayer.');
-                              setPaymentProcessing(false);
-                            }
-                          } catch (error) {
-                            console.error('Zenipay error:', error);
-                            alert('Erreur de paiement. Contactez-nous au 581-748-7017');
-                            setPaymentProcessing(false);
-                          }
-                        }}
-                        className="w-full py-5 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-black font-black text-xl rounded-2xl transition-all flex items-center justify-center gap-3"
-                      >
-                        PAYER L'ACOMPTE {getDepositAmount().toFixed(2)}$ CAD
-                      </button>
-
-                      <p className="text-center text-white/40 text-xs">
-                        Paiement securise par Zenipay
-                      </p>
-
-                      <button
-                        onClick={() => setShopStep(1)}
-                        className="w-full py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all"
-                      >
-                        MODIFIER LE PROJET
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {shopStep > 1 && shopStep < 5 && (
+          <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {SITE.gallery.map((g, i) => (
               <button
-                onClick={() => setShopStep(shopStep - 1)}
-                className="mt-6 w-full py-3 text-white/60 hover:text-white font-medium text-sm"
+                key={g.src + i}
+                data-reveal
+                style={{ ['--rd' as string]: `${(i % 2) * 80}ms` }}
+                onClick={() => setLightbox(g)}
+                className="hud group relative aspect-[4/3] overflow-hidden rounded-[22px] border border-[rgba(120,160,255,0.12)] text-left"
               >
-                â† Retour a l'etape precedente
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={g.src} alt={g.t} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-premium group-hover:scale-105" />
+                <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+                <span className="absolute inset-x-6 bottom-6 flex items-end justify-between gap-3">
+                  <span>
+                    <span className="block font-heading text-2xl font-extrabold text-white sm:text-3xl">{g.t}</span>
+                    {g.s && <span className="mt-1 block text-sm font-medium text-accent">{g.s}</span>}
+                  </span>
+                  <span className="grid h-10 w-10 place-items-center rounded-full border border-white/25 bg-black/40 backdrop-blur transition-colors group-hover:border-accent">
+                    <Plus className="h-4 w-4 text-white" />
+                  </span>
+                </span>
               </button>
-            )}
+            ))}
           </div>
         </div>
-      )}
+      </section>
 
-      {/* DEVIS MODAL */}
-      {showQuote && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 sm:p-6" onClick={() => setShowQuote(false)}>
-          <div className="w-full max-w-lg bg-zinc-900 rounded-3xl p-6 sm:p-8 border border-white/10" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-2xl font-black mb-6 text-center">Devis Rapide Toiture</h2>
-            <form className="space-y-4">
-              <input
-                type="text"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                placeholder="Nom complet"
-                className="w-full px-4 py-4 bg-white/5 border border-white/20 rounded-xl text-white text-lg focus:border-orange-500 focus:outline-none"
-              />
-              <input
-                type="tel"
-                value={clientPhone}
-                onChange={(e) => setClientPhone(e.target.value)}
-                placeholder="Telephone"
-                className="w-full px-4 py-4 bg-white/5 border border-white/20 rounded-xl text-white text-lg focus:border-orange-500 focus:outline-none"
-              />
-              <input
-                type="email"
-                value={clientEmail}
-                onChange={(e) => setClientEmail(e.target.value)}
-                placeholder="Email"
-                className="w-full px-4 py-4 bg-white/5 border border-white/20 rounded-xl text-white text-lg focus:border-orange-500 focus:outline-none"
-              />
-              <button 
-                type="button"
-                onClick={() => { downloadQuotePdf(); setShowQuote(false); }}
-                className="w-full py-5 bg-orange-500 text-black font-black text-xl rounded-xl"
-              >
-                TELECHARGER LE DEVIS PDF
-              </button>
-            </form>
-            <p className="text-center text-white/40 text-sm mt-4">
-              Ou appelle: <a href="tel:5817487017" className="text-orange-400 font-bold">581-748-7017</a>
+      {/* ═══════════════ FAQ ═══════════════ */}
+      <section id="faq" className="sec scroll-mt-16 border-t border-[rgba(120,160,255,0.1)]">
+        <div className="wrap grid gap-10 lg:grid-cols-12">
+          <div data-reveal className="lg:col-span-4">
+            <span className="eyebrow">Questions fréquentes</span>
+            <h2 className="h2 mt-5">
+              Vous vous <span className="grad-accent">demandez…</span>
+            </h2>
+            <p className="lead mt-5">Une autre question ? Un conseiller répond au téléphone.</p>
+            <a href={PHONE_HREF} className="btn-ghost mt-6 font-mono">
+              <Phone className="h-4 w-4 text-accent" /> {PHONE}
+            </a>
+          </div>
+          <div className="lg:col-span-8">
+            {SITE.faq.map((f, i) => (
+              <details key={f.q} data-reveal style={{ ['--rd' as string]: `${i * 50}ms` }} className="group border-t border-[rgba(120,160,255,0.14)] last:border-b" open={i === 0}>
+                <summary className="flex cursor-pointer list-none items-start justify-between gap-6 py-6 [&::-webkit-details-marker]:hidden">
+                  <span className="font-heading text-lg font-bold leading-snug text-white sm:text-xl">{f.q}</span>
+                  <span className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-[rgba(120,160,255,0.28)] transition-transform duration-300 group-open:rotate-45 group-open:border-accent">
+                    <Plus className="h-4 w-4 text-accent" />
+                  </span>
+                </summary>
+                <p className="max-w-2xl pb-7 leading-relaxed text-z-dim">{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ CTA FINAL ═══════════════ */}
+      <section className="pb-20 sm:pb-28">
+        <div className="wrap">
+          <div data-reveal className="frame-grad">
+            <div className="relative grid gap-10 overflow-hidden rounded-[25px] bg-gradient-to-br from-[#0E1524] to-[#070a12] px-5 py-10 sm:px-12 sm:py-14 lg:grid-cols-2 lg:items-center lg:px-14">
+              <div aria-hidden className="absolute -left-40 -top-52 h-[520px] w-[520px] rounded-full blur-[30px]" style={{ background: 'radial-gradient(circle, rgb(var(--accent-rgb) / 0.22), transparent 65%)' }} />
+              <div aria-hidden className="absolute -bottom-52 -right-40 h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle,rgba(255,107,26,0.18),transparent_65%)] blur-[30px]" />
+              <div className="relative">
+                <span className="eyebrow">On vous rappelle</span>
+                <h2 className="h2 mt-5">
+                  Parlons de votre projet <span className="grad-build">{SITE.short.toLowerCase()}.</span>
+                </h2>
+                <p className="lead mt-5 max-w-md">Laissez vos coordonnées : un conseiller vous rappelle sous 24 h. Gratuit et sans engagement.</p>
+                <ul className="mt-6 space-y-2.5">
+                  {['Soumission gratuite', 'Entrepreneur certifié RBQ', 'Partout au Québec'].map((t) => (
+                    <li key={t} className="flex items-center gap-2.5 text-white/85">
+                      <span className="grid h-5 w-5 place-items-center rounded-md bg-accent/15">
+                        <Check className="h-3.5 w-3.5 text-accent" />
+                      </span>
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <CallbackForm />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ PIED DE PAGE ═══════════════ */}
+      <footer className="relative border-t border-[rgba(120,160,255,0.14)] bg-z-noir/80">
+        <div aria-hidden className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg,transparent,var(--accent) 30%,#ff6b1a 70%,transparent)' }} />
+        <div className="wrap grid gap-10 py-14 md:grid-cols-12">
+          <div className="md:col-span-5">
+            <div className="flex items-center gap-2.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="" className="h-10 w-10 rounded-[10px] object-contain ring-1 ring-white/15" />
+              <span className="font-heading text-lg font-black text-white">{SITE.name}</span>
+            </div>
+            <p className="mt-5 max-w-sm text-sm leading-relaxed text-z-dim">
+              Une division de Zeniva, la plateforme de construction et de rénovation au Québec. Entrepreneurs certifiés RBQ.
             </p>
+            <a href={PHONE_HREF} className="mt-6 inline-flex items-center gap-3 rounded-2xl border border-[rgba(120,160,255,0.28)] bg-z-surface/70 px-5 py-3.5 font-mono text-xl text-white transition-colors hover:border-accent">
+              <Phone className="h-5 w-5 text-accent" /> {PHONE}
+            </a>
+          </div>
+          <div className="md:col-span-3">
+            <p className="label">Réseau Zeniva</p>
+            <ul className="mt-4 space-y-1">
+              {DIVISIONS.map((d) => (
+                <li key={d.slug}>
+                  <a href={d.url} className={`group flex items-center justify-between border-b border-[rgba(120,160,255,0.1)] py-2.5 text-sm transition-colors hover:text-white ${d.slug === SITE.slug ? 'text-white' : 'text-z-dim'}`}>
+                    <span className="flex items-center gap-3">
+                      <span className="h-1.5 w-1.5 rounded-full" style={{ background: d.color }} />
+                      {d.name}
+                    </span>
+                    <ArrowUpRight className="h-3.5 w-3.5 opacity-50 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="md:col-span-4">
+            <p className="label">Contact</p>
+            <ul className="mt-4 space-y-3 text-sm text-z-dim">
+              <li className="flex items-center gap-3"><MapPin className="h-4 w-4 text-accent" /> Partout au Québec</li>
+              <li><a href={`mailto:${EMAIL}`} className="hover:text-white">{EMAIL}</a></li>
+              <li><a href="/soumission" className="hover:text-white">Soumission détaillée →</a></li>
+              <li><a href="https://www.zeniva.ca" className="hover:text-white">zeniva.ca — la plateforme ↗</a></li>
+            </ul>
           </div>
         </div>
-      )}
-
-      {/* FOOTER */}
-      <footer className="py-8 px-4 sm:px-6 border-t border-white/10 bg-[#0f0a0a]">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img src="/logo.png" alt="Zeniva" className="w-8 h-8 object-contain" />
-            <span className="font-bold text-xl">ZENIVA TOITURE</span>
-          </div>
-          <p className="text-2xl font-black text-orange-400 mb-2">581-748-7017</p>
-          <p className="text-white/40">Garantie 10-50 ans - Prix: $5.50 - $15.00/pied carre</p>
+        <div className="wrap flex flex-col gap-2 border-t border-[rgba(120,160,255,0.1)] py-6 text-xs text-z-faint sm:flex-row sm:justify-between">
+          <p className="font-mono uppercase tracking-widest">© {new Date().getFullYear()} Zeniva — Tous droits réservés</p>
+          <p>Prix indicatifs ; une visite confirme le prix final.</p>
         </div>
       </footer>
 
-      {/* LIGHTBOX */}
-      {lightboxOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4" onClick={closeLightbox}>
-          <button onClick={closeLightbox} className="absolute top-4 right-4 p-3 bg-white/10 rounded-full hover:bg-white/20 z-10">
-            <X className="w-8 h-8" />
+      {/* ═══════════════ BARRE MOBILE ═══════════════ */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[rgba(120,160,255,0.2)] bg-[rgba(5,7,11,0.92)] p-3 backdrop-blur-xl lg:hidden">
+        <div className="grid grid-cols-[auto_1fr] gap-2.5">
+          <a href={PHONE_HREF} className="btn-ghost px-5 py-3.5" aria-label={`Appeler le ${PHONE}`}>
+            <Phone className="h-5 w-5 text-accent" /> Appeler
+          </a>
+          <a href="#estimation" className="btn-main py-3.5 text-[0.95rem]">
+            Estimation gratuite <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
+      </div>
+
+      <ShopModal open={shop} onClose={() => setShop(false)} />
+
+      {lightbox && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/95 p-4" onClick={() => setLightbox(null)}>
+          <button onClick={() => setLightbox(null)} aria-label="Fermer" className="absolute right-4 top-4 grid h-12 w-12 place-items-center rounded-full bg-white/10 hover:bg-white/20">
+            <X className="h-6 w-6" />
           </button>
-          <img src={lightboxImage.src} alt={lightboxImage.alt} className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
+          <figure onClick={(e) => e.stopPropagation()} className="max-w-5xl">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={lightbox.src} alt={lightbox.t} className="max-h-[82vh] w-auto rounded-2xl object-contain" />
+            <figcaption className="mt-3 text-center font-heading text-lg font-bold text-white">
+              {lightbox.t} {lightbox.s && <span className="font-sans text-sm font-normal text-accent">· {lightbox.s}</span>}
+            </figcaption>
+          </figure>
         </div>
       )}
-
     </div>
+  );
+}
+
+function Showcase({
+  id,
+  data,
+  onOpen,
+}: {
+  id?: string;
+  data: NonNullable<typeof SITE.showcase2>;
+  onOpen: (i: Img) => void;
+}) {
+  const n = data.items.length;
+  const cols = n === 2 ? 'sm:grid-cols-2' : n % 3 === 0 ? 'lg:grid-cols-3' : 'lg:grid-cols-4';
+  const aspect = n === 2 ? 'aspect-[4/3]' : data.square ? 'aspect-square' : 'aspect-[4/5]';
+  return (
+    <section id={id} className="sec scroll-mt-16 border-t border-[rgba(120,160,255,0.1)]">
+      <div className="wrap">
+        <div data-reveal className="max-w-2xl">
+          <span className="eyebrow">{data.eyebrow}</span>
+          <h2 className="h2 mt-5">
+            {data.title} <span className="grad-accent">{data.titleAccent}</span>
+          </h2>
+          <p className="lead mt-5">{data.sub}</p>
+        </div>
+        <div className={`mt-12 grid gap-3 sm:gap-4 ${n === 2 ? 'grid-cols-1' : 'grid-cols-2'} ${cols}`}>
+          {data.items.map((it, i) => (
+            <button
+              key={it.src + it.t}
+              data-reveal
+              style={{ ['--rd' as string]: `${(i % 4) * 60}ms` }}
+              onClick={() => onOpen(it)}
+              className={`spot group relative overflow-hidden rounded-[20px] border border-[rgba(120,160,255,0.14)] bg-z-card text-left ${aspect}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={it.src} alt={it.t} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-premium group-hover:scale-110" />
+              <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/5 to-transparent" />
+              <span className="absolute inset-x-4 bottom-4">
+                <span className="block font-heading text-base font-extrabold text-white sm:text-lg">{it.t}</span>
+                {it.s && <span className="mt-0.5 block font-mono text-[0.7rem] text-accent">{it.s}</span>}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CallbackForm() {
+  const [c, setC] = useState({ nom: '', telephone: '', email: '', message: '', website: '' });
+  const [errors, setErrors] = useState<ReturnType<typeof validateContact>>({});
+  // Les erreurs se mettent à jour pendant la saisie (seulement après une première tentative)
+  useEffect(() => {
+    if (Object.keys(errors).length) setErrors(validateContact(c));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [c]);
+  const [state, setState] = useState<'idle' | 'sending' | 'done'>('idle');
+  const [err, setErr] = useState('');
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const v = validateContact(c);
+    setErrors(v);
+    if (Object.keys(v).length) return;
+    setState('sending');
+    setErr('');
+    const r = await sendLead({ ...c, origine: 'formulaire de rappel' });
+    if (r.ok) setState('done');
+    else {
+      setState('idle');
+      setErr(r.error);
+    }
+  }
+
+  if (state === 'done')
+    return (
+      <div className="relative rounded-2xl border border-accent/40 bg-accent/10 p-8 text-center">
+        <span className="mx-auto grid h-14 w-14 animate-pop place-items-center rounded-full bg-accent">
+          <Check className="h-7 w-7 text-z-noir" strokeWidth={3} />
+        </span>
+        <p className="mt-4 font-heading text-2xl font-extrabold text-white">Merci {c.nom.split(' ')[0]} !</p>
+        <p className="mt-2 text-z-dim">On vous rappelle sous 24 h.</p>
+      </div>
+    );
+
+  return (
+    <form onSubmit={submit} noValidate className="relative grid gap-2.5">
+      <input className="field" placeholder="Nom complet" autoComplete="name" value={c.nom} aria-invalid={errors.nom ? 'true' : undefined} onChange={(e) => setC({ ...c, nom: e.target.value })} />
+      <div className="grid gap-2.5 sm:grid-cols-2">
+        <input className="field" placeholder="Téléphone" type="tel" inputMode="tel" autoComplete="tel" value={c.telephone} aria-invalid={errors.telephone ? 'true' : undefined} onChange={(e) => setC({ ...c, telephone: e.target.value })} />
+        <input className="field" placeholder="Courriel" type="email" inputMode="email" autoComplete="email" value={c.email} aria-invalid={errors.email ? 'true' : undefined} onChange={(e) => setC({ ...c, email: e.target.value })} />
+      </div>
+      <textarea className="field min-h-[96px] resize-y" placeholder="Votre projet en quelques mots (optionnel)" value={c.message} onChange={(e) => setC({ ...c, message: e.target.value })} />
+      <input tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" value={c.website} onChange={(e) => setC({ ...c, website: e.target.value })} />
+      {Object.keys(errors).length > 0 && <p className="text-xs text-red-300">À compléter : {Object.values(errors).join(', ')}.</p>}
+      {err && <p role="alert" className="rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-2 text-sm text-red-200">{err}</p>}
+      <button type="submit" disabled={state === 'sending'} className="btn-main mt-1 py-4 text-base">
+        {state === 'sending' ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Me faire rappeler <ArrowRight className="h-4 w-4" /></>}
+      </button>
+    </form>
   );
 }
