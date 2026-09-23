@@ -2,78 +2,305 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ════════════════════════════════════════════════════════════
+   ZENIVA — DIVISION · « CHANTIER NUMÉRIQUE »
+   Même langage que zeniva.ca et zenitech.dev : nuit graphite,
+   grille de plan, halos, spotlight. L'accent (--accent) est celui
+   de la division, l'action principale reste orange chantier.
+   ════════════════════════════════════════════════════════════ */
+
+:root {
+  --line: rgba(120, 160, 255, 0.14);
+  --line2: rgba(120, 160, 255, 0.28);
+  --build: linear-gradient(100deg, #ff6b1a 0%, #ffb020 100%);
+}
+
 @layer base {
-  * {
-    @apply border-zenicorp-border;
+  html {
+    color-scheme: dark;
+    background: #07090e;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
   body {
-    @apply bg-white text-zenicorp-black antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply text-z-text antialiased;
+    background: transparent;
   }
-  html {
-    scroll-behavior: smooth;
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  ::selection {
+    background: rgb(var(--accent-rgb) / 0.35);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent-rgb) / 0.85);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  h1, h2, h3, h4 {
+    @apply font-heading;
+    text-wrap: balance;
+  }
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
   }
 }
 
 @layer components {
-  .container-zenicorp {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  .wrap {
+    @apply mx-auto w-full max-w-[82rem] px-4 sm:px-8;
   }
-  
-  .btn-primary {
-    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-zenicorp-black border-2 border-zenicorp-black rounded-none hover:bg-zenicorp-gold hover:border-zenicorp-gold hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-zenicorp-gold focus:ring-offset-2;
+  .sec {
+    padding-top: clamp(4rem, 8vw, 7rem);
+    padding-bottom: clamp(4rem, 8vw, 7rem);
   }
-  
-  .btn-secondary {
-    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-zenicorp-black bg-transparent border-2 border-zenicorp-black rounded-none hover:bg-zenicorp-black hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-zenicorp-black focus:ring-offset-2;
+  .h2 {
+    @apply font-heading text-[clamp(2rem,4.2vw,3.25rem)] font-extrabold leading-[1.04] tracking-[-0.03em] text-white;
   }
-  
-  .btn-gold {
-    @apply inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-zenicorp-gold border-2 border-zenicorp-gold rounded-none hover:bg-zenicorp-black hover:border-zenicorp-black hover:text-zenicorp-gold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-zenicorp-black focus:ring-offset-2;
+  .lead {
+    @apply text-lg leading-relaxed text-z-dim;
   }
 
-  .heading-1 {
-    @apply text-3xl sm:text-4xl lg:text-5xl font-heading font-bold tracking-tight text-zenicorp-black;
+  /* Dégradé de la division (accent → accent2) */
+  .grad-accent {
+    background-image: linear-gradient(100deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
   }
-  
-  .heading-2 {
-    @apply text-2xl sm:text-3xl font-heading font-bold tracking-tight text-zenicorp-black;
-  }
-  
-  .heading-3 {
-    @apply text-xl sm:text-2xl font-heading font-semibold tracking-tight text-zenicorp-black;
-  }
-  
-  .body-large {
-    @apply text-lg text-zenicorp-mediumGray leading-relaxed;
-  }
-  
-  .body-base {
-    @apply text-base text-zenicorp-mediumGray leading-relaxed;
-  }
-  
-  .section-padding {
-    @apply py-8 sm:py-12 lg:py-16;
-  }
-  
-  .card {
-    @apply bg-white border border-zenicorp-border rounded-none overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-zenicorp-gold;
-  }
-  
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-none text-xs font-medium;
+  .grad-build {
+    background-image: var(--build);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
   }
 
-  .input-field {
-    @apply w-full px-4 py-3 text-sm text-zenicorp-black bg-white border-2 border-zenicorp-border rounded-md focus:border-zenicorp-gold focus:outline-none;
+  .eyebrow {
+    @apply inline-flex items-center gap-3 font-mono text-label uppercase text-accent;
+  }
+  .eyebrow::before {
+    content: '';
+    @apply h-px w-7 bg-accent;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-2.5 rounded-full border px-3.5 py-2 font-mono text-[0.68rem] font-medium uppercase tracking-[0.14em] text-z-dim backdrop-blur;
+    border-color: var(--line2);
+    background: rgba(12, 17, 27, 0.6);
+  }
+  .chip-dot {
+    @apply h-2 w-2 shrink-0 animate-dot-pulse rounded-full bg-accent;
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  /* ─────────── BOUTONS ─────────── */
+  .btn {
+    @apply relative inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-xl px-6 py-3.5 text-sm font-bold tracking-tight transition-all duration-300 ease-premium disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-main {
+    @apply btn text-z-noir;
+    background: var(--build);
+    box-shadow: 0 10px 30px -8px rgba(255, 107, 26, 0.55);
+  }
+  .btn-main:not(:disabled):hover {
+    box-shadow: 0 14px 40px -6px rgba(255, 176, 32, 0.6), 0 0 0 1px rgba(255, 176, 32, 0.6);
+    transform: translateY(-2px);
+  }
+  .btn-ghost {
+    @apply btn border text-z-text backdrop-blur;
+    border-color: var(--line2);
+    background: rgba(12, 17, 27, 0.65);
+  }
+  .btn-ghost:not(:disabled):hover {
+    border-color: rgb(var(--accent-rgb) / 0.6);
+    background: rgb(var(--accent-rgb) / 0.08);
+    transform: translateY(-2px);
+  }
+
+  /* ─────────── SURFACES ─────────── */
+  .panel {
+    @apply rounded-[20px] border bg-gradient-to-b from-z-card to-[#0A0F1A];
+    border-color: var(--line);
+  }
+  .glass {
+    @apply border backdrop-blur-xl;
+    border-color: var(--line2);
+    background: rgba(12, 17, 27, 0.78);
+    box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.8);
+  }
+  .frame-grad {
+    @apply relative rounded-[26px] p-px;
+    background: linear-gradient(140deg, rgb(var(--accent-rgb) / 0.7), rgba(70, 150, 255, 0.2) 45%, rgba(255, 107, 26, 0.45) 80%, rgba(255, 176, 32, 0.6));
+  }
+
+  /* Spotlight : bordure + halo sous le curseur (--mx/--my posés par Backdrop) */
+  .spot {
+    position: relative;
+    isolation: isolate;
+  }
+  .spot::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgb(var(--accent-rgb) / 0.8), rgba(255, 107, 26, 0.45) 40%, transparent 70%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .spot:hover::before {
+    opacity: 1;
+  }
+
+  /* Coins de visée */
+  .hud {
+    position: relative;
+  }
+  .hud::before,
+  .hud::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    z-index: 3;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .hud::before {
+    left: 12px;
+    top: 12px;
+    border-left: 2px solid var(--accent);
+    border-top: 2px solid var(--accent);
+  }
+  .hud::after {
+    right: 12px;
+    bottom: 12px;
+    border-right: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+  }
+  .hud:hover::before {
+    left: 8px;
+    top: 8px;
+  }
+  .hud:hover::after {
+    right: 8px;
+    bottom: 8px;
+  }
+
+  .hazard {
+    background-image: repeating-linear-gradient(-45deg, #ffb020 0 10px, #0a0f1a 10px 20px);
+  }
+  .bp-grid {
+    background-image: linear-gradient(rgba(120, 160, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120, 160, 255, 0.06) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+  .mask-fade-edges {
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  /* ─────────── FORMULAIRES ─────────── */
+  .field {
+    @apply w-full rounded-xl border bg-z-noir/70 px-4 py-3.5 text-[0.95rem] text-white transition-all duration-200 placeholder:text-z-faint focus:outline-none;
+    border-color: var(--line2);
+  }
+  .field:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / 0.15);
+  }
+  .field[aria-invalid='true'] {
+    border-color: rgba(248, 113, 113, 0.7);
+  }
+  select.field {
+    @apply appearance-none pr-9;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23A3B0C6' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+  select.field option {
+    background: #0c111b;
+    color: #edf2fa;
+  }
+  .label {
+    @apply mb-2 block font-mono text-[0.66rem] font-medium uppercase tracking-[0.16em] text-z-faint;
+  }
+
+  /* Tuile de choix (finition, type de projet) */
+  .choice {
+    @apply relative flex cursor-pointer flex-col rounded-2xl border p-4 text-left transition-all duration-200;
+    border-color: var(--line);
+    background: rgba(5, 7, 11, 0.5);
+  }
+  .choice:hover {
+    border-color: var(--line2);
+  }
+  .choice[data-on='true'] {
+    border-color: var(--accent);
+    background: rgb(var(--accent-rgb) / 0.08);
+    box-shadow: 0 0 0 1px var(--accent) inset, 0 10px 30px -12px rgb(var(--accent-rgb) / 0.45);
   }
 }
 
 @layer utilities {
-  .text-balance { text-wrap: balance; }
-  .animate-fade-in { animation: fadeIn 0.5s ease-out; }
-  .animate-slide-up { animation: slideUp 0.6s ease-out; }
-  
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .js [data-reveal] {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) var(--rd, 0ms), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) var(--rd, 0ms);
+  }
+  .js [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #05070b;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1c2535;
+    border-radius: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
