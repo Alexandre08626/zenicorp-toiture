@@ -17,6 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr-CA" className={`${inter.variable} dark`}>
       <body className="bg-[#0f0a0a] text-white antialiased">
         {children}
+        <div className="bg-[#0f0a0a] px-4 pb-6 pt-2 text-center text-xs text-white/30">
+          <a href="https://zenitech.dev/" className="hover:text-white/60 transition-colors">Site conçu par Zenitech — agence web et IA</a>
+        </div>
         {/* Orvel AI — assistant de conversation, servi par zenitech.dev */}
         <Script
           src="https://zenitech.dev/widget/orvel.js"
